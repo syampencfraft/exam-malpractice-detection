@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up - Smart Exam Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-wrapper {
+        min-height: 90vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+        padding-top: 100px;
+        padding-bottom: 50px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .glass-form {
+        background: rgba(20, 20, 20, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 20px;
+        padding: 3rem;
+        width: 100%;
+        max-width: 800px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glass-form::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, #FFD700, #FDB931);
+    }
+
+    .form-control,
+    .form-select {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 0.8rem 1rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #FFD700;
+        box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.1);
+        color: white;
+    }
+
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .btn-auth {
+        background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
+        color: black;
+        font-weight: 700;
+        padding: 0.8rem;
+        border-radius: 10px;
+        border: none;
+        width: 100%;
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-auth:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    .auth-title {
+        color: #FFD700;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 2rem;
+    }
+
+    .auth-link {
+        color: rgba(255, 255, 255, 0.6);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .auth-link:hover {
+        color: #FFD700;
+    }
+
+    .form-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Background blobs */
+    .bg-blob {
+        position: absolute;
+        filter: blur(80px);
+        z-index: -1;
+        opacity: 0.4;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-blob" style="top: 10%; left: 10%; width: 300px; height: 300px; background: #FFD700;"></div>
+<div class="bg-blob" style="bottom: 10%; right: 10%; width: 400px; height: 400px; background: #FDB931;"></div>
+
+<div class="container auth-wrapper">
+    <div class="glass-form">
+        <h2 class="auth-title">Create Account</h2>
+
+        {% if msg %}
+        <div class="alert alert-success bg-transparent text-success border-success border-opacity-50">
+            <i class="fas fa-check-circle me-2"></i>{{ msg }}
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-danger bg-transparent text-danger border-danger border-opacity-50">
+            <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+        </div>
+        {% endif %}
+
+        <div class="alert alert-info bg-transparent text-info border-info border-opacity-50 mb-4">
+            <div class="d-flex">
+                <i class="fas fa-camera me-3 mt-1"></i>
+                <div>
+                    <strong>Face Recognition Enabled</strong><br>
+                    <small>Your uploaded photo will be used for AI identity verification during exams. Please ensure
+                        good lighting.</small>
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row g-4 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="username" class="form-control" placeholder="Choose a username" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <div class="input-group">
+                    <input type="password" name="password" id="signupPassword" class="form-control"
+                        placeholder="Create a strong password" required>
+                    <span class="input-group-text bg-transparent border-secondary text-secondary"
+                        style="cursor: pointer;" onclick="togglePassword('signupPassword', 'signupIcon')">
+                        <i class="fas fa-eye" id="signupIcon"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Age</label>
+                    <input type="number" name="age" class="form-control" placeholder="Your age" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" name="phone" class="form-control" placeholder="Contact number" required>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Class</label>
+                    <input type="text" name="class" class="form-control" placeholder="e.g. CS-A" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Class ID / Roll No</label>
+                    <input type="text" name="class_id" class="form-control" placeholder="e.g. 2024001" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Department</label>
+                <input type="text" name="department" class="form-control" placeholder="e.g. Computer Science" required>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Profile Photo (for Face ID)</label>
+                <input type="file" name="image" class="form-control" accept="image/*" required>
+                <div class="form-text text-white-50">Supported formats: JPG, PNG. Max size: 5MB.</div>
+            </div>
+
+            <button type="submit" class="btn btn-auth">
+                Create Account <i class="fas fa-user-plus ms-2"></i>
+            </button>
+        </form>
+
+        <div class="text-center mt-4">
+            <p class="text-white-50 mb-0">Already have an account? <a href="{% url 'login' %}" class="auth-link">Login
+                    here</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword(inputId, iconId) {
+        const passwordInput = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+</script>
+{% endblock %}

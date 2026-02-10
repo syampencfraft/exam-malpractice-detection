@@ -1,0 +1,25 @@
+from django.urls import path
+from . import views
+urlpatterns = [
+    path('',views.first,name='first'),
+    path('dashboard/',views.index,name='index'),
+    path('signup/', views.signup_view, name='signup'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('approve/', views.approve_students, name='approve'),
+    path('profile/', views.profile_view, name='profile'),
+    path('profile/<int:pk>/', views.profile_view, name='admin_view_profile'),
+    path('edit-profile/', views.edit_profile, name='edit_profile'),
+    path('add-exam/', views.add_exam, name='add_exam'),
+    path('verify-face/<int:exam_id>/', views.verify_face_view, name='verify_face'),
+    path('api/verify-face/', views.verify_face_api, name='verify_face_api'),
+    path('add-questions/<int:exam_id>/', views.add_questions, name='add_questions'),
+    path('evaluate/<int:result_id>/', views.evaluate_exam, name='evaluate_exam'),
+    path('take-exam/<int:pk>/', views.take_exam, name='take_exam'),
+    path('results/', views.view_results, name='view_results'),
+    path('admin-results/', views.admin_results, name='admin_results'),
+    path('log-malpractice/', views.log_malpractice, name='log_malpractice'),
+    path('malpractice-report/<int:student_id>/<int:exam_id>/', views.view_malpractice_logs, name='malpractice_report'),
+    path('download-report/<int:student_id>/<int:exam_id>/', views.download_malpractice_report, name='download_report'),
+    path('view-recording/<int:result_id>/', views.admin_view_recording, name='view_recording'),
+]

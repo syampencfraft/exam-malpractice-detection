@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block title %}Exam Results - Admin Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .results-container {
+        padding-top: 100px;
+        padding-bottom: 50px;
+        min-height: 80vh;
+        z-index: 1;
+        position: relative;
+    }
+
+    .glass-card {
+        background: rgba(20, 20, 20, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.3s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 215, 0, 0.3);
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .filter-bar {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-control,
+    .form-select {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        padding: 0.7rem 1rem;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        box-shadow: none;
+        border: 1px solid #FFD700;
+    }
+
+    /* Table */
+    .table-custom {
+        color: white;
+        background-color: transparent !important;
+    }
+
+    .table-custom thead th {
+        background: rgba(255, 215, 0, 0.1);
+        color: #FFD700;
+        border: none;
+        padding: 1rem;
+    }
+
+    .table-custom tbody tr {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        transition: background 0.2s;
+        background-color: transparent !important;
+    }
+
+    .table-custom tbody tr:hover {
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .table-custom td {
+        padding: 1rem;
+        vertical-align: middle;
+        background-color: transparent !important;
+        color: white !important;
+    }
+
+    .malpractice-badge {
+        background: rgba(231, 76, 60, 0.2);
+        color: #e74c3c;
+        border: 1px solid rgba(231, 76, 60, 0.3);
+        padding: 0.3rem 0.8rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .malpractice-badge:hover {
+        background: rgba(231, 76, 60, 0.3);
+        color: #ff6b6b;
+    }
+
+    .btn-evaluate {
+        background: #FFD700;
+        color: black;
+        border: none;
+        padding: 0.4rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-evaluate:hover {
+        background: #FDB931;
+        transform: translateY(-2px);
+        color: black;
+    }
+
+    .bg-blob {
+        position: absolute;
+        filter: blur(120px);
+        z-index: -1;
+        opacity: 0.3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-blob" style="top: 0; right: 0; width: 600px; height: 600px; background: #FFD700;"></div>
+<div class="bg-blob" style="bottom: 0; left: 0; width: 400px; height: 400px; background: #FF4500;"></div>
+
+<div class="container results-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-white fw-bold">Example Results & Analysis</h2>
+        <a href="{% url 'approve' %}" class="btn btn-outline-light">Back to Dashboard</a>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value text-danger">{{ total_logs }}</div>
+                <div class="stat-label">Total Violations</div>
+            </div>
+        </div>
+        {% for stat in severity_stats %}
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div
+                    class="stat-value {% if stat.severity == 'HIGH' %}text-danger{% elif stat.severity == 'MEDIUM' %}text-warning{% else %}text-info{% endif %}">
+                    {{ stat.count }}
+                </div>
+                <div class="stat-label">{{ stat.severity }} Severity</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="glass-card">
+        <!-- Filters -->
+        <div class="filter-bar">
+            <form method="GET" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label text-white-50">Filter by Exam</label>
+                    <select name="exam" class="form-select">
+                        <option value="">All Exams</option>
+                        {% for exam in exams %}
+                        <option value="{{ exam.id }}" {% if selected_exam == exam.id %}selected{% endif %}>{{ exam.title
+                            }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-white-50">Min Severity</label>
+                    <select name="severity" class="form-select">
+                        <option value="">All Levels</option>
+                        <option value="LOW" {% if selected_severity == "LOW" %}selected{% endif %}>Low</option>
+                        <option value="MEDIUM" {% if selected_severity == "MEDIUM" %}selected{% endif %}>Medium</option>
+                        <option value="HIGH" {% if selected_severity == "HIGH" %}selected{% endif %}>High</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-white-50">Search Student</label>
+                    <input type="text" name="student" class="form-control" placeholder="Enter username..."
+                        value="{{ selected_student }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-warning w-100 fw-bold">Apply Filters</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Exam Title</th>
+                        <th>Score</th>
+                        <th>Grade</th>
+                        <th>Flags</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td class="fw-bold">{{ result.student.username }}</td>
+                        <td>{{ result.exam.title }}</td>
+                        <td>
+                            {% if result.status == 'PENDING' %}
+                            <span class="text-white-50">-</span>
+                            {% else %}
+                            <span class="text-warning fw-bold">{{ result.score }}/{{ result.total_questions }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span
+                                class="badge {% if result.grade == 'Distinction' or result.grade == 'A+' %}bg-success{% elif result.grade == 'Pass' or result.grade == 'A' or result.grade == 'B' %}bg-primary{% elif result.grade == 'Fail' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                {{ result.grade|default:"Pending" }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if result.malpractice_count > 0 %}
+                            <a href="{% url 'malpractice_report' result.student.id result.exam.id %}"
+                                class="malpractice-badge">
+                                <i class="fas fa-exclamation-triangle me-1"></i> {{ result.malpractice_count }} Flags
+                            </a>
+                            {% else %}
+                            <span class="text-white-50 small"><i class="fas fa-check me-1"></i> Clean</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if result.status == 'PENDING' %}
+                            <span class="text-info small fw-bold">Needs Review</span>
+                            {% else %}
+                            <span class="text-success small fw-bold">Published</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                {% if result.video_file %}
+                                <a href="{% url 'view_recording' result.id %}" class="btn btn-sm btn-info text-white"
+                                    title="View Recording">
+                                    <i class="fas fa-video"></i>
+                                </a>
+                                {% endif %}
+                                <a href="{% url 'evaluate_exam' result.id %}" class="btn-evaluate">
+                                    {% if result.status == 'PENDING' %}Evaluate{% else %}Edit{% endif %}
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-white-50">No results found matching your filters.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

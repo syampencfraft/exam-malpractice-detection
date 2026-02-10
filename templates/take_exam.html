@@ -1,0 +1,609 @@
+{% extends 'base.html' %}
+
+{% block title %}Online Exam - {{ exam.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hide standard navigation and footer during exam */
+    .navbar:not(.exam-nav),
+    footer {
+        display: none !important;
+    }
+
+    body {
+        background-color: #000 !important;
+    }
+
+    .exam-nav {
+        background: rgba(0, 0, 0, 0.9) !important;
+        backdrop-filter: blur(20px);
+        border-bottom: 2px solid var(--primary-color);
+        padding: 0.8rem 0;
+        z-index: 1050;
+    }
+
+    .timer-card {
+        background: rgba(255, 215, 0, 0.1);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        padding: 0.5rem 1.5rem;
+        border-radius: 12px;
+        color: var(--primary-color);
+        font-weight: 800;
+        font-size: 1.5rem;
+        font-family: 'JetBrains Mono', monospace;
+        letter-spacing: 2px;
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
+    }
+
+    .exam-container {
+        padding-top: 120px;
+        padding-bottom: 100px;
+        min-height: 100vh;
+    }
+
+    .glass-question {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glass-question:hover {
+        border-color: rgba(255, 215, 0, 0.3);
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.07);
+    }
+
+    .question-number {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: var(--primary-color);
+        color: black;
+        padding: 0.4rem 1.2rem;
+        font-weight: 800;
+        font-size: 0.9rem;
+        border-bottom-right-radius: 15px;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .form-check-label {
+        color: rgba(255, 255, 255, 0.8);
+        padding: 1rem 1.5rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-check-input:checked+.form-check-label {
+        background: rgba(255, 215, 0, 0.1);
+        border-color: var(--primary-color);
+        color: white;
+    }
+
+    /* AI Proctoring Feedback */
+    #camera-container {
+        position: fixed;
+        bottom: 30px;
+        left: 30px;
+        /* Changed to left to avoid blocking common submit buttons */
+        width: 240px;
+        height: 180px;
+        border: 2px solid var(--primary-color);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        background: #000;
+        z-index: 1000;
+    }
+
+    #camera-container video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .proctor-status {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 10px;
+        font-weight: 800;
+        color: #00ff00;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .monitoring-badge {
+        position: fixed;
+        bottom: 230px;
+        left: 30px;
+        background: rgba(255, 215, 0, 0.1);
+        color: var(--primary-color);
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        backdrop-filter: blur(5px);
+        z-index: 999;
+    }
+
+    #alert-container {
+        position: fixed;
+        top: 100px;
+        right: 30px;
+        width: 320px;
+        z-index: 1060;
+    }
+
+    .alert-item {
+        background: rgba(220, 53, 69, 0.4) !important;
+        backdrop-filter: blur(15px);
+        color: #fff !important;
+        border: 1px solid rgba(220, 53, 69, 0.5) !important;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        margin-bottom: 15px;
+        animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        50% {
+            transform: scale(1.05);
+            opacity: 0.7;
+        }
+    }
+
+    .animate-pulse {
+        animation: pulse 2s infinite;
+    }
+
+    .btn-submit-exam {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: black;
+        border: none;
+        padding: 1.25rem;
+        font-weight: 800;
+        font-size: 1.2rem;
+        border-radius: 15px;
+        width: 100%;
+        margin-top: 1rem;
+        box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+        transition: all 0.3s;
+    }
+
+    .btn-submit-exam:hover {
+        transform: scale(1.02);
+        box-shadow: 0 15px 40px rgba(255, 215, 0, 0.3);
+    }
+
+    .bg-blob {
+        position: absolute;
+        filter: blur(150px);
+        z-index: -1;
+        opacity: 0.15;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar exam-nav fixed-top">
+    <div class="container d-flex justify-content-between align-items-center">
+        <span class="text-white fw-bold fs-4">📝 <span class="d-none d-sm-inline">{{ exam.title }}</span></span>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-white-50 d-none d-md-block fw-600">REMAINING TIME</span>
+            <div id="timer" class="timer-card">00:00:00</div>
+        </div>
+    </div>
+</nav>
+
+<div class="bg-blob" style="top: 20%; right: 10%; width: 600px; height: 600px; background: #FFD700;"></div>
+<div class="bg-blob" style="bottom: 10%; left: 5%; width: 500px; height: 5000px; background: #FF4500;"></div>
+
+<div id="camera-container">
+    <video id="video" autoplay playsinline muted></video>
+    <div class="proctor-status">🔴 LIVE MONITORING</div>
+</div>
+
+<div class="monitoring-badge animate-pulse">
+    <i class="fas fa-robot me-2"></i> AI PROCTOR ACTIVE
+</div>
+
+<div id="alert-container"></div>
+
+<div class="container exam-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <!-- Start Overlay -->
+            <div id="exam-start-overlay">
+                <div class="glass-question text-center py-5">
+                    <div class="mb-4">
+                        <div class="display-1 text-warning mb-4"><i class="fas fa-shield-alt"></i></div>
+                        <h2 class="text-white fw-bold">Ready to Start?</h2>
+                        <p class="text-white-50">Please review the proctoring guidelines before beginning.</p>
+                    </div>
+
+                    <div class="row text-start mb-5 g-4">
+                        <div class="col-md-6">
+                            <div
+                                class="p-3 rounded-4 bg-white bg-opacity-5 border border-white border-opacity-10 h-100">
+                                <h6 class="text-warning fw-bold mb-3">ENABLED SYSTEMS</h6>
+                                <ul class="list-unstyled text-white-50 small mb-0">
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> High-Def
+                                        Video Recording</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Real-time
+                                        Face Detection</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Attention &
+                                        Gaze Monitoring</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div
+                                class="p-3 rounded-4 bg-white bg-opacity-5 border border-white border-opacity-10 h-100">
+                                <h6 class="text-warning fw-bold mb-3">RESTRICTIONS</h6>
+                                <ul class="list-unstyled text-white-50 small mb-0">
+                                    <li class="mb-2"><i class="fas fa-times-circle text-danger me-2"></i> No Tab
+                                        Switching</li>
+                                    <li class="mb-2"><i class="fas fa-times-circle text-danger me-2"></i> No Additional
+                                        Persons</li>
+                                    <li class="mb-2"><i class="fas fa-times-circle text-danger me-2"></i> No Mobile
+                                        Devices</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="start-btn" class="btn-submit-exam" style="max-width: 300px;">
+                        LAUNCH EXAM <i class="fas fa-rocket ms-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Exam Content -->
+            <div id="exam-content" style="display: none;">
+                <form id="exam-form" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="file" name="video_file" id="video-file-input" hidden>
+
+                    {% for question in questions %}
+                    <div class="glass-question">
+                        <div class="question-number">Question {{ forloop.counter }}</div>
+                        <h5 class="text-white fw-bold mb-4 pt-2">{{ question.question_text|linebreaksbr }}</h5>
+
+                        {% if question.question_type == 'MCQ' %}
+                        <div class="options-container">
+                            <div class="form-check p-0">
+                                <input class="form-check-input d-none" type="radio" name="q{{ question.id }}"
+                                    id="q{{ question.id }}_1" value="1">
+                                <label class="form-check-label" for="q{{ question.id }}_1">
+                                    <span class="me-3 opacity-50">A.</span> {{ question.option_1 }}
+                                </label>
+                            </div>
+                            <div class="form-check p-0">
+                                <input class="form-check-input d-none" type="radio" name="q{{ question.id }}"
+                                    id="q{{ question.id }}_2" value="2">
+                                <label class="form-check-label" for="q{{ question.id }}_2">
+                                    <span class="me-3 opacity-50">B.</span> {{ question.option_2 }}
+                                </label>
+                            </div>
+                            <div class="form-check p-0">
+                                <input class="form-check-input d-none" type="radio" name="q{{ question.id }}"
+                                    id="q{{ question.id }}_3" value="3">
+                                <label class="form-check-label" for="q{{ question.id }}_3">
+                                    <span class="me-3 opacity-50">C.</span> {{ question.option_3 }}
+                                </label>
+                            </div>
+                            <div class="form-check p-0">
+                                <input class="form-check-input d-none" type="radio" name="q{{ question.id }}"
+                                    id="q{{ question.id }}_4" value="4">
+                                <label class="form-check-label" for="q{{ question.id }}_4">
+                                    <span class="me-3 opacity-50">D.</span> {{ question.option_4 }}
+                                </label>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="mb-3">
+                            <textarea class="form-control" name="q{{ question.id }}" rows="6"
+                                placeholder="Type your detailed answer here..."
+                                style="background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1); color: white; border-radius: 12px;"></textarea>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="glass-question text-center">
+                        <h4 class="text-white-50">No questions available for this exam.</h4>
+                    </div>
+                    {% endfor %}
+
+                    {% if questions %}
+                    <div class="text-center py-4">
+                        <button type="submit" class="btn-submit-exam" id="submit-exam">
+                            FINAL SUBMISSION <i class="fas fa-paper-plane ms-2"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- face-api.js for face detection -->
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+<!-- COCO-SSD for object detection -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+
+<script>
+    const video = document.getElementById('video');
+    const startBtn = document.getElementById('start-btn');
+    const overlay = document.getElementById('exam-start-overlay');
+    const content = document.getElementById('exam-content');
+    const timerDisplay = document.getElementById('timer');
+    const alertContainer = document.getElementById('alert-container');
+
+    let duration = parseInt("{{ exam.duration_minutes }}") * 60;
+    let examStarted = false;
+    let lastLogTime = {};
+    let detectionInterval;
+    let modelsLoaded = false;
+    let objectModel = null;
+
+    // Show alert to user
+    function showAlert(message, severity = 'warning') {
+        console.log(`[AI Alert] ${message} (${severity})`);
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${severity} alert-dismissible fade show alert-item`;
+        alertDiv.innerHTML = `
+            <strong>🚨 AI Alert:</strong> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        alertContainer.appendChild(alertDiv);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+
+    // Capture snapshot from video
+    function captureSnapshot() {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        return canvas.toDataURL('image/jpeg', 0.6);
+    }
+
+    // Log malpractice with throttling
+    async function logMalpractice(type, details, severity = 'MEDIUM', includeSnapshot = false) {
+        const now = Date.now();
+        if (lastLogTime[type] && (now - lastLogTime[type] < 10000)) return; // 10s throttle
+
+        lastLogTime[type] = now;
+        console.warn("🚨 AI Alert:", type, details);
+
+        const payload = {
+            exam_id: "{{ exam.id }}",
+            log_type: type,
+            details: details,
+            severity: severity
+        };
+
+        if (includeSnapshot) {
+            payload.snapshot = captureSnapshot();
+        }
+
+        try {
+            await fetch("{% url 'log_malpractice' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(payload)
+            });
+        } catch (e) {
+            console.error("Logging failed", e);
+        }
+    }
+
+    // Load face-api and coco-ssd models
+    async function loadModels() {
+        const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+        try {
+            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+            await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+            objectModel = await cocoSsd.load();
+            modelsLoaded = true;
+            console.log('✅ AI models loaded');
+        } catch (error) {
+            console.error('❌ Failed to load models:', error);
+        }
+    }
+
+    // Object Detection
+    async function detectObjects() {
+        if (!objectModel || !video) return;
+        try {
+            const predictions = await objectModel.detect(video);
+            predictions.forEach(prediction => {
+                const class_name = prediction.class.toLowerCase();
+                const score = prediction.score;
+                if (score > 0.6) {
+                    if (class_name === 'cell phone') {
+                        showAlert('Mobile Phone Detected!', 'danger');
+                        logMalpractice('PHONE_DETECTED', 'Mobile phone detected in frame', 'HIGH', true);
+                    } else if (class_name === 'book' || class_name === 'paper') {
+                        showAlert('Suspicious Object (Book/Paper) Detected!', 'danger');
+                        logMalpractice('SUSPICIOUS_OBJECT', `Object detected: ${class_name}`, 'HIGH', true);
+                    }
+                }
+            });
+        } catch (e) { }
+    }
+
+    // Face detection and analysis
+    async function detectFaces() {
+        if (!examStarted || !modelsLoaded) return;
+        detectObjects();
+        try {
+            const detections = await faceapi
+                .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+                .withFaceLandmarks();
+
+            if (detections.length === 0) {
+                showAlert('No face detected! Please stay in frame.', 'danger');
+                logMalpractice('NO_FACE', 'Student not visible in camera', 'HIGH', true);
+            } else if (detections.length > 1) {
+                showAlert(`${detections.length} people detected! Only you should be visible.`, 'danger');
+                logMalpractice('MULTIPLE_FACES', `${detections.length} faces detected in frame`, 'HIGH', true);
+            } else {
+                const landmarks = detections[0].landmarks;
+                analyzeFacePose(landmarks);
+                analyzeEyeGaze(landmarks);
+            }
+        } catch (error) { }
+    }
+
+    function analyzeFacePose(landmarks) {
+        const nose = landmarks.getNose()[3];
+        const faceX = nose.x / video.videoWidth;
+        const faceY = nose.y / video.videoHeight;
+
+        if (faceX < 0.3) logMalpractice('HEAD_POSE_LEFT', 'Student head turned left', 'MEDIUM');
+        else if (faceX > 0.7) logMalpractice('HEAD_POSE_RIGHT', 'Student head turned right', 'MEDIUM');
+
+        if (faceY < 0.25) logMalpractice('HEAD_POSE_UP', 'Student looking upward', 'MEDIUM');
+        else if (faceY > 0.75) logMalpractice('HEAD_POSE_DOWN', 'Student looking downward', 'MEDIUM');
+    }
+
+    function analyzeEyeGaze(landmarks) {
+        const leftEye = landmarks.getLeftEye();
+        const rightEye = landmarks.getRightEye();
+        const avgEyeX = (leftEye[0].x + rightEye[3].x) / 2 / video.videoWidth;
+        if (avgEyeX < 0.35 || avgEyeX > 0.65) {
+            showAlert('Eyes off screen detected!', 'warning');
+            logMalpractice('EYE_TRACKING', 'Student eyes not focused on screen', 'LOW');
+        }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && examStarted) {
+            showAlert('Tab switch detected!', 'danger');
+            logMalpractice('TAB_SWITCH', 'Student switched browser tab', 'HIGH');
+        }
+    });
+
+    let mediaRecorder;
+    let recordedChunks = [];
+
+    async function initCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+                audio: true
+            });
+            video.srcObject = stream;
+            return stream;
+        } catch (err) {
+            alert("❌ Camera and Microphone access required!");
+            return false;
+        }
+    }
+
+    startBtn.addEventListener('click', async () => {
+        const stream = await initCamera();
+        if (stream) {
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            mediaRecorder.start();
+            overlay.style.display = 'none';
+            content.style.display = 'block';
+            examStarted = true;
+            startTimer();
+            showAlert('Proctoring initialized. Monitoring active.', 'info'); // Test alert
+            detectionInterval = setInterval(detectFaces, 2000);
+        }
+    });
+
+    async function finishExam() {
+        examStarted = false;
+        clearInterval(detectionInterval);
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+            mediaRecorder.onstop = async () => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const file = new File([blob], "exam_recording.webm", { type: 'video/webm' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                document.getElementById('video-file-input').files = dataTransfer.files;
+                document.getElementById('exam-form').submit();
+            };
+        } else {
+            document.getElementById('exam-form').submit();
+        }
+    }
+
+    function startTimer() {
+        const interval = setInterval(() => {
+            const hours = Math.floor(duration / 3600);
+            const minutes = Math.floor((duration % 3600) / 60);
+            const seconds = duration % 60;
+            timerDisplay.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            duration--;
+            if (duration < 0) { clearInterval(interval); finishExam(); }
+        }, 1000);
+    }
+
+    document.getElementById('submit-exam').addEventListener('click', (e) => {
+        e.preventDefault();
+        if (confirm("Are you sure you want to final submit?")) finishExam();
+    });
+
+    window.addEventListener('load', loadModels);
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('copy', e => { if (examStarted) { e.preventDefault(); showAlert('Copying is prohibited!'); } });
+</script>
+{% endblock %}

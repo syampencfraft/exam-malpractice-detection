@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Smart Exam Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        padding-top: 100px;
+        padding-bottom: 50px;
+        min-height: 80vh;
+        z-index: 1;
+        position: relative;
+    }
+
+    .section-header {
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 0.5rem;
+    }
+
+    .section-subtitle {
+        color: var(--text-dim);
+        font-size: 1.1rem;
+    }
+
+    .exam-card {
+        background: rgba(20, 20, 20, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        border-radius: 20px;
+        padding: 2rem;
+        height: 100%;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .exam-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #FFD700, #FDB931);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .exam-card:hover {
+        transform: translateY(-10px);
+        background: rgba(30, 30, 30, 0.8);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        border-color: rgba(255, 215, 0, 0.5);
+    }
+
+    .exam-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 215, 0, 0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #FFD700;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .exam-title {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .exam-meta {
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .exam-meta i {
+        color: #FFD700;
+    }
+
+    .badge-custom {
+        background: rgba(255, 215, 0, 0.1);
+        color: #FFD700;
+        padding: 0.4rem 0.8rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .btn-start {
+        width: 100%;
+        padding: 0.8rem;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
+        color: black;
+        font-weight: 700;
+        border: none;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+    }
+
+    .btn-start:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        color: black;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        border: 1px dashed rgba(255, 255, 255, 0.2);
+    }
+
+    .bg-blob {
+        position: absolute;
+        filter: blur(100px);
+        z-index: -1;
+        opacity: 0.3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-blob" style="top: 0; left: 0; width: 600px; height: 600px; background: #FFD700;"></div>
+<div class="bg-blob" style="bottom: 0; right: 0; width: 500px; height: 500px; background: #FF4500;"></div>
+
+<div class="container dashboard-container">
+    <div class="section-header fade-in">
+        <h1 class="section-title">Available Exams</h1>
+        <p class="section-subtitle">Select an exam below to begin your assessment.</p>
+    </div>
+
+    {% if exams %}
+    <div class="row g-4">
+        {% for exam in exams %}
+        <div class="col-md-6 col-lg-4 fade-in" style="animation-delay: {{ forloop.counter0|add:1 }}00ms">
+            <div class="exam-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="card-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <span class="badge-custom">
+                        <i class="far fa-clock me-1"></i> {{ exam.duration_minutes }} Mins
+                    </span>
+                </div>
+
+                <h3 class="exam-title text-truncate">{{ exam.title }}</h3>
+
+                <div class="exam-meta">
+                    <span><i class="far fa-calendar"></i> {{ exam.date }}</span>
+                    <span><i class="far fa-clock"></i> {{ exam.time }}</span>
+                </div>
+
+                <div class="mb-4">
+                    <small class="text-white-50 d-block mb-1">Topic</small>
+                    <p class="text-white mb-0">{{ exam.topic }}</p>
+                </div>
+
+                <a href="{% url 'take_exam' exam.id %}" class="btn-start">
+                    Start Exam <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state fade-in">
+        <div class="mb-4">
+            <i class="fas fa-clipboard-list fa-4x text-white-50"></i>
+        </div>
+        <h3 class="text-white mb-2">No Exams Available</h3>
+        <p class="text-white-50">Check back later for new assessments assigned to you.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Add fade-in animation
+    document.addEventListener('DOMContentLoaded', () => {
+        const elements = document.querySelectorAll('.fade-in');
+        elements.forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+
+            setTimeout(() => {
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}

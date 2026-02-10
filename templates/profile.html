@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - Smart Exam Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        padding-top: 120px;
+        padding-bottom: 50px;
+        min-height: 80vh;
+        position: relative;
+        z-index: 1;
+    }
+
+    .glass-card {
+        background: rgba(20, 20, 20, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        border-radius: 20px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, #FFD700, #FDB931);
+    }
+
+    .profile-header {
+        background: linear-gradient(to bottom, rgba(255, 215, 0, 0.05), transparent);
+        padding: 3rem 2rem;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .profile-img-wrapper {
+        position: relative;
+        width: 160px;
+        height: 160px;
+        margin: 0 auto 1.5rem;
+    }
+
+    .profile-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid rgba(20, 20, 20, 0.8);
+        box-shadow: 0 0 0 4px #FFD700, 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .profile-initials {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #FFD700, #FDB931);
+        color: black;
+        font-size: 3.5rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: 4px solid rgba(20, 20, 20, 0.8);
+        box-shadow: 0 0 0 4px #FFD700, 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .profile-name {
+        color: white;
+        font-weight: 800;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-email {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 1.1rem;
+    }
+
+    .info-section {
+        padding: 2rem;
+    }
+
+    .info-group {
+        margin-bottom: 2rem;
+    }
+
+    .info-label {
+        color: #FFD700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .info-value {
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 500;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 0.5rem;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .status-approved {
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+        border: 1px solid rgba(46, 204, 113, 0.3);
+    }
+
+    .status-pending {
+        background: rgba(255, 165, 2, 0.2);
+        color: #ffa502;
+        border: 1px solid rgba(255, 165, 2, 0.3);
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
+        color: black;
+        font-weight: 700;
+        padding: 0.8rem 2rem;
+        border-radius: 12px;
+        border: none;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(255, 215, 0, 0.2);
+        color: black;
+    }
+
+    .bg-blob {
+        position: absolute;
+        filter: blur(120px);
+        z-index: -1;
+        opacity: 0.3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-blob" style="top: 0; right: 0; width: 500px; height: 500px; background: #FFD700;"></div>
+<div class="bg-blob" style="bottom: 0; left: 0; width: 400px; height: 400px; background: #FF4500;"></div>
+
+<div class="container profile-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="glass-card fade-in">
+                <div class="profile-header">
+                    <div class="profile-img-wrapper">
+                        {% if profile.image %}
+                        <img src="{{ profile.image.url }}" alt="Profile Image" class="profile-img">
+                        {% else %}
+                        <div class="profile-initials">
+                            {{ profile.user.username|slice:":1"|upper }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <h2 class="profile-name">{{ profile.user.username }}</h2>
+                    <p class="profile-email">{{ profile.user.email }}</p>
+
+                    <div class="mt-4">
+                        <a href="{% url 'edit_profile' %}" class="btn-edit">
+                            <i class="fas fa-edit me-2"></i>Edit Profile
+                        </a>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-group">
+                                <span class="info-label">Academic Details</span>
+                                <div class="mb-3">
+                                    <small class="text-white-50">Department</small>
+                                    <div class="info-value">{{ profile.department }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-white-50">Class</small>
+                                    <div class="info-value">{{ profile.student_class }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-white-50">Class ID / Roll No</small>
+                                    <div class="info-value">{{ profile.class_id }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-group">
+                                <span class="info-label">Personal Info</span>
+                                <div class="mb-3">
+                                    <small class="text-white-50">Age</small>
+                                    <div class="info-value">{{ profile.age }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-white-50">Phone Number</small>
+                                    <div class="info-value">{{ profile.phone }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-white-50">Account Status</small>
+                                    <div class="pt-2">
+                                        {% if profile.is_approved %}
+                                        <span class="status-badge status-approved">
+                                            <i class="fas fa-check-circle me-1"></i> Approved
+                                        </span>
+                                        {% else %}
+                                        <span class="status-badge status-pending">
+                                            <i class="fas fa-clock me-1"></i> Pending Approval
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Fade in animation
+    document.querySelector('.fade-in').style.opacity = '0';
+    document.querySelector('.fade-in').style.transform = 'translateY(20px)';
+    document.querySelector('.fade-in').style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+
+    setTimeout(() => {
+        document.querySelector('.fade-in').style.opacity = '1';
+        document.querySelector('.fade-in').style.transform = 'translateY(0)';
+    }, 100);
+</script>
+{% endblock %}

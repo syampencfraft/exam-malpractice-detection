@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+
+{% block title %}Face Verification - {{ exam.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .verify-container {
+        padding-top: 100px;
+        padding-bottom: 50px;
+        min-height: 90vh;
+        z-index: 1;
+        position: relative;
+    }
+
+    .glass-card {
+        background: rgba(20, 20, 20, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        border-radius: 24px;
+        padding: 2.5rem;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        height: 100%;
+    }
+
+    .webcam-wrapper {
+        position: relative;
+        background: #000;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 2px solid rgba(255, 215, 0, 0.3);
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.1);
+        margin: 1.5rem 0;
+    }
+
+    #webcam {
+        width: 100%;
+        height: auto;
+        display: block;
+        transform: scaleX(-1);
+        /* Mirror effect */
+    }
+
+    .webcam-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 250px;
+        height: 320px;
+        border: 2px dashed rgba(255, 215, 0, 0.5);
+        border-radius: 50%;
+        pointer-events: none;
+        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.3);
+    }
+
+    .instruction-item {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 0.8rem;
+        border-left: 4px solid var(--primary-color);
+        transition: transform 0.2s;
+    }
+
+    .instruction-item:hover {
+        transform: translateX(5px);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .status-badge {
+        padding: 1rem;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .status-badge.processing {
+        background: rgba(255, 193, 7, 0.15);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        display: block;
+    }
+
+    .status-badge.success {
+        background: rgba(40, 167, 69, 0.15);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+        display: block;
+    }
+
+    .status-badge.error {
+        background: rgba(220, 53, 69, 0.15);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        display: block;
+    }
+
+    .btn-verify {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: black;
+        border: none;
+        padding: 1.2rem;
+        font-weight: 800;
+        font-size: 1.1rem;
+        border-radius: 14px;
+        width: 100%;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .btn-verify:hover:not(:disabled) {
+        transform: scale(1.02);
+        box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3);
+    }
+
+    .btn-verify:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .bg-blob {
+        position: absolute;
+        filter: blur(120px);
+        z-index: -1;
+        opacity: 0.2;
+    }
+
+    .exam-badge {
+        background: rgba(255, 215, 0, 0.1);
+        color: var(--primary-color);
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-blob" style="top: 10%; left: 5%; width: 500px; height: 500px; background: #FFD700;"></div>
+<div class="bg-blob" style="bottom: 10%; right: 5%; width: 400px; height: 400px; background: #FF4500;"></div>
+
+<div class="container verify-container">
+    <div class="row g-5 align-items-stretch">
+        <!-- Left Column: Camera and Instructions -->
+        <div class="col-lg-7">
+            <div class="glass-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="text-white fw-bold mb-0">Identity Verification</h2>
+                    <span class="exam-badge">Live Capture</span>
+                </div>
+
+                <div class="webcam-wrapper">
+                    <video id="webcam" autoplay playsinline></video>
+                    <div class="webcam-overlay"></div>
+                </div>
+
+                <div id="statusMessage" class="status-badge"></div>
+
+                <div class="row g-3">
+                    <div class="col-6">
+                        <button id="verifyBtn" class="btn-verify">
+                            <i class="fas fa-camera me-2"></i> Verify Identity
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'index' %}" class="btn btn-outline-light w-100 py-3 rounded-4 fw-bold">
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Exam Info and Checklist -->
+        <div class="col-lg-5">
+            <div class="glass-card d-flex flex-column">
+                <div class="mb-5">
+                    <h4 class="text-warning fw-bold mb-3"><i class="fas fa-info-circle me-2"></i> Exam Details</h4>
+                    <div class="p-3 rounded-4 bg-white bg-opacity-5 border border-white border-opacity-10">
+                        <h5 class="text-white mb-2">{{ exam.title }}</h5>
+                        <div class="d-flex flex-wrap gap-3">
+                            <small class="text-white-50"><i class="far fa-clock me-1"></i> {{ exam.duration_minutes }}
+                                Mins</small>
+                            <small class="text-white-50"><i class="far fa-calendar me-1"></i> {{ exam.date }}</small>
+                            <small class="text-white-50"><i class="fas fa-book me-1"></i> {{ exam.topic }}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-grow-1">
+                    <h4 class="text-white fw-bold mb-3"><i class="fas fa-list-check me-2"></i> Guidelines</h4>
+
+                    <div class="instruction-item">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-user-check text-warning mt-1 me-3"></i>
+                            <div>
+                                <div class="text-white fw-600">Neutral Expression</div>
+                                <small class="text-white-50">Keep a natural face, avoid smiling or frowning during
+                                    capture.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="instruction-item">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-lightbulb text-warning mt-1 me-3"></i>
+                            <div>
+                                <div class="text-white fw-600">Optimal Lighting</div>
+                                <small class="text-white-50">Ensure your face is well-lit and avoid bright lights behind
+                                    you.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="instruction-item">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-eye text-warning mt-1 me-3"></i>
+                            <div>
+                                <div class="text-white fw-600">Look at Camera</div>
+                                <small class="text-white-50">Keep your eyes on the lens, and remove any eyewear or
+                                    masks.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="instruction-item">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-id-card text-warning mt-1 me-3"></i>
+                            <div>
+                                <div class="text-white fw-600">Frame Position</div>
+                                <small class="text-white-50">Position your face within the dashed circle in the camera
+                                    view.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const video = document.getElementById('webcam');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const examId = "{{ exam.id }}";
+
+    let stream = null;
+
+    // Initialize webcam
+    async function initWebcam() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    facingMode: 'user'
+                }
+            });
+            video.srcObject = stream;
+        } catch (error) {
+            showStatus('error', '❌ Unable to access webcam. Please grant camera permissions and refresh the page.');
+            verifyBtn.disabled = true;
+        }
+    }
+
+    // Capture image from webcam
+    function captureImage() {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        return canvas.toDataURL('image/jpeg', 0.8);
+    }
+
+    // Show status message
+    function showStatus(type, message) {
+        statusMessage.className = 'status-badge ' + type;
+        statusMessage.innerHTML = message;
+    }
+
+    // Verify face
+    async function verifyFace() {
+        verifyBtn.disabled = true;
+        showStatus('processing', '<span class="spinner-border spinner-border-sm me-2"></span> Verifying your identity...');
+
+        try {
+            const imageData = captureImage();
+
+            const response = await fetch('{% url "verify_face_api" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    exam_id: examId,
+                    image: imageData
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.verified) {
+                showStatus('success', '✅ ' + data.message);
+
+                // Stop webcam
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+
+                // Redirect to exam after 2 seconds
+                setTimeout(() => {
+                    window.location.href = '{% url "take_exam" exam.id %}';
+                }, 2000);
+            } else {
+                showStatus('error', '❌ ' + (data.error || data.message));
+                verifyBtn.disabled = false;
+            }
+        } catch (error) {
+            showStatus('error', '❌ Verification failed. Please try again.');
+            verifyBtn.disabled = false;
+        }
+    }
+
+    // Event listeners
+    verifyBtn.addEventListener('click', verifyFace);
+
+    // Initialize on page load
+    window.addEventListener('load', initWebcam);
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+    });
+</script>
+{% endblock %}

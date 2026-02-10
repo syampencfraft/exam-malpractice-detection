@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Exam - Smart Exam Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        padding-top: 100px;
+        padding-bottom: 50px;
+        min-height: 80vh;
+        z-index: 1;
+        position: relative;
+    }
+
+    .glass-form {
+        background: rgba(20, 20, 20, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glass-form::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, #FFD700, #FDB931);
+    }
+
+    .form-title {
+        color: white;
+        font-weight: 800;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .form-control,
+    .form-select {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 0.8rem 1rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #FFD700;
+        box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.1);
+        color: white;
+    }
+
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    .form-label {
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .student-list-container {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        max-height: 250px;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+
+    .form-check {
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: background 0.2s;
+        margin-bottom: 0.25rem;
+    }
+
+    .form-check:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .form-check-input {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .form-check-input:checked {
+        background-color: #FFD700;
+        border-color: #FFD700;
+    }
+
+    .form-check-label {
+        color: white;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
+        color: black;
+        font-weight: 700;
+        padding: 1rem;
+        border-radius: 12px;
+        border: none;
+        width: 100%;
+        transition: all 0.3s ease;
+        font-size: 1.1rem;
+        margin-top: 1rem;
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(255, 215, 0, 0.2);
+    }
+
+    .btn-back {
+        position: absolute;
+        top: 2rem;
+        left: 2rem;
+        color: rgba(255, 255, 255, 0.6);
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .btn-back:hover {
+        color: #FFD700;
+    }
+
+    .bg-blob {
+        position: absolute;
+        filter: blur(100px);
+        z-index: -1;
+        opacity: 0.3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-blob" style="top: 20%; left: 10%; width: 300px; height: 300px; background: #FFD700;"></div>
+<div class="bg-blob" style="bottom: 20%; right: 10%; width: 400px; height: 400px; background: #FF4500;"></div>
+
+<div class="container form-container">
+    <a href="{% url 'approve' %}" class="btn-back">
+        <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+    </a>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="glass-form fade-in">
+                <h2 class="form-title">Create New Exam</h2>
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label class="form-label">Exam Title</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g. Midterm Mathematics"
+                            required>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Date</label>
+                            <input type="date" name="date" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Time</label>
+                            <input type="time" name="time" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-8">
+                            <label class="form-label">Topic / Subject</label>
+                            <input type="text" name="topic" class="form-control" placeholder="e.g. Algebra and Calculus"
+                                required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Duration (Min)</label>
+                            <input type="number" name="duration" class="form-control" placeholder="e.g. 120" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Assign Students</label>
+                        <div class="student-list-container custom-scrollbar">
+                            {% for student in students %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="students"
+                                    value="{{ student.user.id }}" id="student_{{ student.id }}">
+                                <label class="form-check-label d-flex justify-content-between align-items-center pe-2"
+                                    for="student_{{ student.id }}">
+                                    <span>
+                                        <strong class="me-2">{{ student.user.username }}</strong>
+                                        <small class="text-white-50">{{ student.class_id }}</small>
+                                    </span>
+                                </label>
+                            </div>
+                            {% empty %}
+                            <p class="text-white-50 text-center my-3">No approved students available.</p>
+                            {% endfor %}
+                        </div>
+                        <div class="form-text text-white-50 mt-2">Select the students who are eligible for this exam.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-create">
+                        Next: Add Questions <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Fade in animation
+    const form = document.querySelector('.fade-in');
+    form.style.opacity = '0';
+    form.style.transform = 'translateY(20px)';
+    form.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+
+    setTimeout(() => {
+        form.style.opacity = '1';
+        form.style.transform = 'translateY(0)';
+    }, 100);
+</script>
+{% endblock %}

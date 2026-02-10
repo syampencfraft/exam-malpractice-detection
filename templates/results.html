@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block title %}My Results - Smart Exam Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #000 !important;
+    }
+
+    .results-container {
+        padding-top: 100px;
+        padding-bottom: 50px;
+        min-height: 80vh;
+        z-index: 1;
+        position: relative;
+    }
+
+    .glass-card {
+        background: #000000;
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #FFD700, #FDB931);
+    }
+
+    .page-title {
+        color: white;
+        font-weight: 800;
+        margin-bottom: 2rem;
+        font-size: 2.5rem;
+    }
+
+    /* Table Styling */
+    .table-custom {
+        color: white;
+        margin-bottom: 0;
+        background-color: transparent !important;
+    }
+
+    .table-custom thead th {
+        background: rgba(255, 215, 0, 0.1);
+        color: #FFD700;
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+    }
+
+    .table-custom tbody tr {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+        background-color: transparent !important;
+    }
+
+    .table-custom tbody tr:hover {
+        background: rgba(255, 215, 0, 0.05) !important;
+    }
+
+    .table-custom tbody td {
+        padding: 1.2rem 1rem;
+        vertical-align: middle;
+        border: none;
+        color: white !important;
+    }
+
+    .status-pending {
+        color: #ffa502;
+        font-weight: 600;
+        background: rgba(255, 165, 2, 0.1);
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+    }
+
+    .score-badge {
+        font-weight: 700;
+        color: #FFD700 !important;
+        font-size: 1.1rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: rgba(255, 215, 0, 0.5);
+    }
+
+    .bg-blob {
+        position: absolute;
+        filter: blur(100px);
+        z-index: -1;
+        opacity: 0.3;
+    }
+
+    /* Animation */
+    .fade-in-row {
+        opacity: 0;
+        animation: fadeInRow 0.5s ease forwards;
+    }
+
+    @keyframes fadeInRow {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-blob" style="top: 10%; left: 5%; width: 400px; height: 400px; background: #FFD700;"></div>
+<div class="bg-blob" style="bottom: 10%; right: 5%; width: 300px; height: 300px; background: #FF4500;"></div>
+
+<div class="container results-container">
+    <h1 class="page-title">My Exam Results</h1>
+
+    <div class="glass-card">
+        <div class="table-responsive">
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>Exam Title</th>
+                        <th>Score</th>
+                        <th>Grade</th>
+                        <th>Flags</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr class="fade-in-row" style="animation-delay: {{ forloop.counter0|add:1 }}00ms">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-warning bg-opacity-10 p-2 me-3 text-warning">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <span class="fw-bold text-white">{{ result.exam.title }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if result.status == 'PENDING' %}
+                            <span class="status-pending">Pending Review</span>
+                            {% else %}
+                            <span class="score-badge">{{ result.score }}/{{ result.total_questions }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span
+                                class="badge {% if result.grade == 'Distinction' or result.grade == 'A+' %}bg-success{% elif result.grade == 'Pass' or result.grade == 'A' or result.grade == 'B' %}bg-primary{% elif result.grade == 'Fail' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                {{ result.grade|default:"Pending" }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if result.malpractice_count > 0 %}
+                            <span class="text-danger small fw-bold">
+                                <i class="fas fa-exclamation-triangle me-1"></i> {{ result.malpractice_count }} Flags
+                            </span>
+                            {% else %}
+                            <span class="text-success small">
+                                <i class="fas fa-check-circle me-1"></i> Clean
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <i class="fas fa-clipboard-list fa-3x mb-3"></i>
+                                <h5>No Results Found</h5>
+                                <p>You haven't completed any exams yet.</p>
+                                <a href="{% url 'index' %}" class="btn btn-warning btn-sm mt-2 fw-bold text-dark">Take
+                                    an Exam</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

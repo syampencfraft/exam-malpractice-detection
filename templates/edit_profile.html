@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile - Smart Exam Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-container {
+        padding-top: 100px;
+        padding-bottom: 50px;
+        min-height: 80vh;
+        position: relative;
+        z-index: 1;
+    }
+
+    .glass-form {
+        background: rgba(20, 20, 20, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glass-form::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, #FFD700, #FDB931);
+    }
+
+    .form-title {
+        color: white;
+        font-weight: 800;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .form-control,
+    .form-select {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 0.8rem 1rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #FFD700;
+        box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.1);
+        color: white;
+    }
+
+    .form-label {
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 0.5rem;
+    }
+
+    .current-img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #FFD700;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
+        color: black;
+        font-weight: 700;
+        padding: 0.8rem;
+        border-radius: 10px;
+        border: none;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    .btn-cancel {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.8rem;
+        border-radius: 10px;
+        width: 100%;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-color: white;
+    }
+
+    .bg-blob {
+        position: absolute;
+        filter: blur(100px);
+        z-index: -1;
+        opacity: 0.3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-blob" style="top: 20%; left: 10%; width: 300px; height: 300px; background: #FFD700;"></div>
+<div class="bg-blob" style="bottom: 20%; right: 10%; width: 400px; height: 400px; background: #FF4500;"></div>
+
+<div class="container edit-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="glass-form fade-in">
+                <h2 class="form-title">Edit Profile</h2>
+
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="text-center mb-4">
+                        {% if form.instance.image %}
+                        <img src="{{ form.instance.image.url }}" alt="Profile Image" class="current-img mb-3">
+                        {% endif %}
+                        <div class="small text-white-50">Update your personal information below</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Profile Image</label>
+                        {{ form.image }}
+                        <div class="form-text text-white-50 mt-2">Upload a new photo to replace the current one.</div>
+                    </div>
+
+                    <div class="row g-4 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Age</label>
+                            {{ form.age }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number</label>
+                            {{ form.phone }}
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Class</label>
+                            {{ form.student_class }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Class ID</label>
+                            {{ form.class_id }}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Department</label>
+                        {{ form.department }}
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <button type="submit" class="btn btn-save">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'profile' %}" class="btn btn-cancel">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Apply bootstrap classes to form fields rendered by Django
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            if (input.type !== 'checkbox' && input.type !== 'radio' && input.type !== 'submit') {
+                input.classList.add('form-control');
+            }
+        });
+
+        // Fade in animation
+        const form = document.querySelector('.fade-in');
+        form.style.opacity = '0';
+        form.style.transform = 'translateY(20px)';
+        form.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+
+        setTimeout(() => {
+            form.style.opacity = '1';
+            form.style.transform = 'translateY(0)';
+        }, 100);
+    });
+</script>
+{% endblock %}

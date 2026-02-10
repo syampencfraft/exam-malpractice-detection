@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Questions - Smart Exam Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        padding-top: 100px;
+        padding-bottom: 50px;
+        min-height: 80vh;
+        z-index: 1;
+        position: relative;
+    }
+
+    .glass-panel {
+        background: rgba(20, 20, 20, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        border-radius: 20px;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .panel-header {
+        background: rgba(255, 215, 0, 0.1);
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .panel-body {
+        padding: 1.5rem;
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+
+    .form-control,
+    .form-select {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 0.8rem;
+        border-radius: 10px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #FFD700;
+        box-shadow: none;
+        color: white;
+    }
+
+    .form-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .question-item {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .question-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 215, 0, 0.3);
+    }
+
+    .badge-type {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-mcq {
+        background: rgba(255, 215, 0, 0.2);
+        color: #FFD700;
+    }
+
+    .badge-text {
+        background: rgba(52, 152, 219, 0.2);
+        color: #3498db;
+    }
+
+    .btn-add {
+        background: #FFD700;
+        color: black;
+        font-weight: 700;
+        border: none;
+        padding: 0.8rem;
+        border-radius: 10px;
+        width: 100%;
+        transition: all 0.3s;
+    }
+
+    .btn-add:hover {
+        background: #FDB931;
+        transform: translateY(-2px);
+    }
+
+    .option-group {
+        border-left: 2px solid #FFD700;
+        padding-left: 1rem;
+        margin-left: 0.5rem;
+    }
+
+    .correct-option {
+        color: #2ecc71;
+        font-weight: 600;
+    }
+
+    .bg-blob {
+        position: absolute;
+        filter: blur(120px);
+        z-index: -1;
+        opacity: 0.3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-blob" style="top: 0; left: 0; width: 500px; height: 500px; background: #FFD700;"></div>
+
+<div class="container page-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-white fw-bold mb-1">{{ exam.title }}</h2>
+            <p class="text-white-50 mb-0">Adding questions to exam</p>
+        </div>
+        <a href="{% url 'approve' %}" class="btn btn-outline-light">
+            <i class="fas fa-check me-2"></i> Finish & Save
+        </a>
+    </div>
+
+    <div class="row g-4" style="height: 70vh;">
+        <!-- Left: Add Question Form -->
+        <div class="col-md-5 h-100">
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <h5 class="text-white mb-0"><i class="fas fa-plus-circle me-2"></i> New Question</h5>
+                </div>
+                <div class="panel-body custom-scrollbar">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Question Type</label>
+                            <select name="question_type" class="form-select" id="questionType"
+                                onchange="toggleOptions()">
+                                <option value="MCQ">Multiple Choice (MCQ)</option>
+                                <option value="DESCRIPTIVE">Descriptive (Text)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Question Text</label>
+                            <textarea name="question_text" class="form-control" rows="3"
+                                placeholder="Enter the question here..." required></textarea>
+                        </div>
+
+                        <div id="mcqOptions">
+                            <label class="form-label">Options</label>
+                            <div class="option-group mb-3">
+                                <input type="text" name="option_1" class="form-control mb-2" placeholder="Option 1">
+                                <input type="text" name="option_2" class="form-control mb-2" placeholder="Option 2">
+                                <input type="text" name="option_3" class="form-control mb-2" placeholder="Option 3">
+                                <input type="text" name="option_4" class="form-control mb-2" placeholder="Option 4">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Correct Answer</label>
+                                <select name="correct_option" class="form-select">
+                                    <option value="1">Option 1</option>
+                                    <option value="2">Option 2</option>
+                                    <option value="3">Option 3</option>
+                                    <option value="4">Option 4</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-add">
+                            Add Question <i class="fas fa-plus ms-1"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Question List -->
+        <div class="col-md-7 h-100">
+            <div class="glass-panel">
+                <div class="panel-header d-flex justify-content-between align-items-center">
+                    <h5 class="text-white mb-0"><i class="fas fa-list-ul me-2"></i> Existing Questions</h5>
+                    <span class="badge bg-white bg-opacity-10">{{ questions.count }} Questions</span>
+                </div>
+                <div class="panel-body custom-scrollbar">
+                    {% for q in questions %}
+                    <div class="question-item fade-in-row" style="animation-delay: {{ forloop.counter0 }}00ms">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="text-white fw-bold mb-0">Q{{ forloop.counter }}. {{ q.question_text }}</h6>
+                            <span
+                                class="badge-type {% if q.question_type == 'MCQ' %}badge-mcq{% else %}badge-text{% endif %}">
+                                {{ q.get_question_type_display }}
+                            </span>
+                        </div>
+
+                        {% if q.question_type == 'MCQ' %}
+                        <div class="ps-3 border-start border-secondary mt-2">
+                            <div
+                                class="small {% if q.correct_option == 1 %}correct-option{% else %}text-white-50{% endif %}">
+                                1. {{ q.option_1 }}</div>
+                            <div
+                                class="small {% if q.correct_option == 2 %}correct-option{% else %}text-white-50{% endif %}">
+                                2. {{ q.option_2 }}</div>
+                            <div
+                                class="small {% if q.correct_option == 3 %}correct-option{% else %}text-white-50{% endif %}">
+                                3. {{ q.option_3 }}</div>
+                            <div
+                                class="small {% if q.correct_option == 4 %}correct-option{% else %}text-white-50{% endif %}">
+                                4. {{ q.option_4 }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5 text-white-50">
+                        <i class="fas fa-clipboard-list fa-3x mb-3 opacity-50"></i>
+                        <p>No questions added yet.<br>Use the form on the left to add questions.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleOptions() {
+        const type = document.getElementById('questionType').value;
+        const mcqDiv = document.getElementById('mcqOptions');
+        const inputs = mcqDiv.querySelectorAll('input, select');
+
+        if (type === 'MCQ') {
+            mcqDiv.style.display = 'block';
+            inputs.forEach(el => el.required = true);
+        } else {
+            mcqDiv.style.display = 'none';
+            inputs.forEach(el => el.required = false);
+        }
+    }
+
+    // Animation
+    document.querySelectorAll('.fade-in-row').forEach(el => {
+        el.style.opacity = '0';
+        el.style.animation = 'fadeInRow 0.5s ease forwards';
+        el.style.animationDelay = el.style.animationDelay || '0s';
+    });
+</script>
+
+<style>
+    @keyframes fadeInRow {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 3px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+</style>
+{% endblock %}

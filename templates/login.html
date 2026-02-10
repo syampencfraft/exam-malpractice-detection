@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Smart Exam Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-wrapper {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 1;
+        padding-top: 100px;
+        padding-bottom: 50px;
+    }
+
+    .glass-form {
+        background: rgba(20, 20, 20, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 20px;
+        padding: 3rem;
+        width: 100%;
+        max-width: 450px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glass-form::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, #FFD700, #FDB931);
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 0.8rem 1rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #FFD700;
+        box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.1);
+        color: white;
+    }
+
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .btn-auth {
+        background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
+        color: black;
+        font-weight: 700;
+        padding: 0.8rem;
+        border-radius: 10px;
+        border: none;
+        width: 100%;
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-auth:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    .auth-title {
+        color: #FFD700;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 2rem;
+    }
+
+    .auth-link {
+        color: rgba(255, 255, 255, 0.6);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .auth-link:hover {
+        color: #FFD700;
+    }
+
+    /* Background blobs */
+    .bg-blob {
+        position: absolute;
+        filter: blur(80px);
+        z-index: -1;
+        opacity: 0.4;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-blob" style="top: 20%; left: 20%; width: 300px; height: 300px; background: #FFD700;"></div>
+<div class="bg-blob" style="bottom: 20%; right: 20%; width: 400px; height: 400px; background: #FDB931;"></div>
+
+<div class="container auth-wrapper">
+    <div class="glass-form">
+        <h2 class="auth-title">Welcome Back</h2>
+
+        {% for message in messages %}
+        <div class="alert alert-danger bg-transparent text-danger border-danger border-opacity-50">
+            <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+        </div>
+        {% endfor %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="form-label text-white-50">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 border-secondary text-secondary">
+                        <i class="fas fa-user"></i>
+                    </span>
+                    <input type="text" name="username" class="form-control border-start-0 ps-0"
+                        placeholder="Enter your username" required>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label text-white-50">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 border-secondary text-secondary">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                    <input type="password" name="password" id="password"
+                        class="form-control border-start-0 border-end-0 ps-0" placeholder="Enter your password"
+                        required>
+                    <span class="input-group-text bg-transparent border-start-0 border-secondary text-secondary"
+                        style="cursor: pointer;" onclick="togglePassword('password', 'toggleIcon')">
+                        <i class="fas fa-eye" id="toggleIcon"></i>
+                    </span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-auth">
+                Login <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+        </form>
+
+        <div class="text-center mt-4">
+            <p class="text-white-50 mb-0">Don't have an account? <a href="{% url 'signup' %}" class="auth-link">Sign
+                    up</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword(inputId, iconId) {
+        const passwordInput = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+</script>
+{% endblock %}

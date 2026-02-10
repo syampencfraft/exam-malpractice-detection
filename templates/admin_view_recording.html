@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}View Recording - {{ result.student.username }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .recording-container {
+        padding-top: 100px;
+        padding-bottom: 50px;
+        min-height: 80vh;
+        z-index: 1;
+        position: relative;
+    }
+
+    .glass-card {
+        background: rgba(20, 20, 20, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+
+    .video-wrapper {
+        width: 100%;
+        border-radius: 15px;
+        overflow: hidden;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        background: #000;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    video {
+        width: 100%;
+        display: block;
+    }
+
+    .info-label {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.2rem;
+    }
+
+    .info-value {
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .bg-blob {
+        position: absolute;
+        filter: blur(120px);
+        z-index: -1;
+        opacity: 0.3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-blob" style="top: 0; right: 0; width: 600px; height: 600px; background: #FFD700;"></div>
+<div class="bg-blob" style="bottom: 0; left: 0; width: 400px; height: 400px; background: #FF4500;"></div>
+
+<div class="container recording-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-white fw-bold">Exam Recording</h2>
+            <p class="text-white-50 mb-0">Reviewing session for {{ result.student.username }}</p>
+        </div>
+        <a href="{% url 'admin_results' %}" class="btn btn-outline-light">Back to Results</a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="glass-card mb-4">
+                {% if result.video_file %}
+                <div class="video-wrapper">
+                    <video controls controlsList="nodownload">
+                        <source src="{{ result.video_file.url }}" type="video/webm">
+                        <source src="{{ result.video_file.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                {% else %}
+                <div class="glass-card text-center py-5">
+                    <div class="display-3 mb-3">📹</div>
+                    <h4 class="text-white">No Recording Available</h4>
+                    <p class="text-white-50">Video was not recorded for this exam session.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="glass-card">
+                <h4 class="text-warning fw-bold mb-4">Session Details</h4>
+
+                <div class="mb-4">
+                    <h5 class="info-label">Student</h5>
+                    <div class="info-value">{{ result.student.username }}</div>
+                    <div class="small text-white-50">{{ result.student.email }}</div>
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="info-label">Exam</h5>
+                    <div class="info-value">{{ result.exam.title }}</div>
+                    <div class="small text-white-50">{{ result.exam.date }}</div>
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="info-label">Score</h5>
+                    <div class="info-value">
+                        {% if result.status == 'PUBLISHED' %}
+                        <span class="text-success">{{ result.score }}/{{ result.total_questions }}</span>
+                        {% else %}
+                        <span class="text-warning">Pending</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <hr class="border-secondary my-4">
+
+                <div class="d-grid gap-2">
+                    <a href="{% url 'malpractice_report' result.student.id result.exam.id %}" class="btn btn-danger">
+                        View Malpractice Report
+                    </a>
+                    <a href="{% url 'evaluate_exam' result.id %}" class="btn btn-warning text-dark fw-bold">
+                        Evaluate / Edit Result
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

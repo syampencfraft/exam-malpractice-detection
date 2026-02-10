@@ -1,0 +1,585 @@
+{% extends 'base.html' %}
+
+{% block title %}Smart Exam Platform - Revolutionizing Online Assessments{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
+        --secondary-gradient: linear-gradient(135deg, #FFF8DC 0%, #FFD700 100%);
+        --glass-bg: rgba(20, 20, 20, 0.6);
+        --glass-border: rgba(255, 215, 0, 0.3);
+        --text-light: #ffffff;
+        --text-dim: #cccccc;
+        --card-bg: rgba(10, 10, 10, 0.8);
+    }
+
+    body {
+        background-color: #000000;
+        color: var(--text-light);
+        font-family: 'Inter', sans-serif;
+        overflow-x: hidden;
+    }
+
+    /* Animated Background */
+    .bg-animation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+    }
+
+    .blob {
+        position: absolute;
+        filter: blur(80px);
+        opacity: 0.4;
+        animation: float 20s infinite ease-in-out;
+    }
+
+    .blob-1 {
+        top: -10%;
+        left: -10%;
+        width: 500px;
+        height: 500px;
+        background: #FFD700;
+        animation-delay: 0s;
+    }
+
+    .blob-2 {
+        bottom: -10%;
+        right: -10%;
+        width: 600px;
+        height: 600px;
+        background: #FDB931;
+        animation-delay: -5s;
+    }
+
+    .blob-3 {
+        top: 40%;
+        left: 40%;
+        width: 400px;
+        height: 400px;
+        background: #FFA500;
+        animation-delay: -10s;
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translate(0, 0) scale(1);
+        }
+
+        33% {
+            transform: translate(30px, -50px) scale(1.1);
+        }
+
+        66% {
+            transform: translate(-20px, 20px) scale(0.9);
+        }
+    }
+
+    /* Navbar Customization */
+    .navbar {
+        background: rgba(0, 0, 0, 0.9) !important;
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    /* Hero Section */
+    .hero-section {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        padding-top: 80px;
+    }
+
+    .hero-content {
+        z-index: 10;
+    }
+
+    .hero-title {
+        font-size: 4.5rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(to right, #fff, #FFD700);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: slideUp 0.8s ease-out;
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+        color: var(--text-dim);
+        margin-bottom: 2.5rem;
+        max-width: 600px;
+        animation: slideUp 0.8s ease-out 0.2s backwards;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        animation: slideUp 0.8s ease-out 0.4s backwards;
+    }
+
+    .btn-glow {
+        position: relative;
+        padding: 1rem 2.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        color: black;
+        background: var(--primary-gradient);
+        border: none;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        z-index: 1;
+    }
+
+    .btn-glow::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+        z-index: -1;
+        transition: opacity 0.3s ease;
+        opacity: 0;
+    }
+
+    .btn-glow:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    }
+
+    .btn-glow:hover::before {
+        opacity: 1;
+    }
+
+    .btn-outline-glow {
+        padding: 1rem 2.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        color: white;
+        background: transparent;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-glow:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    /* 3D Illustration Placeholder */
+    .hero-visual {
+        position: relative;
+        height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .glass-card-3d {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        transform: perspective(1000px) rotateY(-10deg) rotateX(5deg);
+        transition: transform 0.3s ease;
+    }
+
+    .glass-card-3d:hover {
+        transform: perspective(1000px) rotateY(0) rotateX(0);
+    }
+
+    /* Features Section */
+    .features-section {
+        padding: 100px 0;
+        position: relative;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 4rem;
+        background: linear-gradient(to right, #fff, #94a3b8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .feature-card {
+        background: var(--card-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 2.5rem;
+        height: 100%;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        border-color: rgba(99, 102, 241, 0.5);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .feature-card:hover::before {
+        opacity: 1;
+    }
+
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        background: var(--glass-bg);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #6366f1;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+        background: #6366f1;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .feature-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: white;
+    }
+
+    .feature-desc {
+        color: var(--text-dim);
+        line-height: 1.6;
+    }
+
+    /* Stats Section */
+    .stats-container {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 30px;
+        padding: 4rem;
+        margin: 4rem 0;
+        border: 1px solid var(--glass-border);
+    }
+
+    .stat-number {
+        font-size: 3.5rem;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 1.1rem;
+        color: var(--text-dim);
+        font-weight: 500;
+    }
+
+    /* Animations */
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease;
+    }
+
+    .reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Utility */
+    .text-gradient {
+        background: var(--secondary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-animation">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <span
+                        class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-2 mb-4">
+                        <i class="fas fa-star me-2"></i> #1 AI Proctoring Solution
+                    </span>
+                    <h1 class="hero-title">
+                        Secure Exams with<br>
+                        <span class="text-gradient">Intelligent AI</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Experience the future of online assessments. Advanced proctoring,
+                        real-time analytics, and seamless user experience - all in one platform.
+                    </p>
+                    <div class="hero-buttons">
+                        {% if user.is_authenticated %}
+                        {% if user.is_staff %}
+                        <a href="{% url 'approve' %}" class="btn-glow">
+                            <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+                        </a>
+                        {% else %}
+                        <a href="{% url 'index' %}" class="btn-glow">
+                            <i class="fas fa-book-reader me-2"></i>My Exams
+                        </a>
+                        <a href="{% url 'view_results' %}" class="btn-outline-glow">
+                            <i class="fas fa-chart-pie me-2"></i>Results
+                        </a>
+                        {% endif %}
+                        {% else %}
+                        <a href="{% url 'login' %}" class="btn-glow">
+                            <i class="fas fa-rocket me-2"></i>Get Started
+                        </a>
+                        <a href="{% url 'signup' %}" class="btn-outline-glow">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mt-5 mt-lg-0">
+                <div class="hero-visual">
+                    <div class="glass-card-3d">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="rounded-circle bg-success p-2 me-3">
+                                <i class="fas fa-check text-white"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-white mb-0">System Active</h5>
+                                <small class="text-success">Monitoring in progress</small>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between text-white-50 mb-2">
+                                <span>Exam Progress</span>
+                                <span>75%</span>
+                            </div>
+                            <div class="progress" style="height: 6px; background: rgba(255,255,255,0.1);">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="p-3 rounded bg-white bg-opacity-10 text-center">
+                                    <i class="fas fa-camera text-warning mb-2 h4"></i>
+                                    <h6 class="text-white mb-0">Face Scan</h6>
+                                    <small class="text-success">Verified</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 rounded bg-white bg-opacity-10 text-center">
+                                    <i class="fas fa-eye text-info mb-2 h4"></i>
+                                    <h6 class="text-white mb-0">Eye Track</h6>
+                                    <small class="text-success">Active</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="container">
+    <div class="stats-container reveal">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="stat-item">
+                    <div class="stat-number" data-target="10000">0</div>
+                    <div class="stat-label">Exams Conducted</div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="stat-item">
+                    <div class="stat-number" data-target="99">0%</div>
+                    <div class="stat-label">Malpractice Detection</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-item">
+                    <div class="stat-number" data-target="5000">0</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <h2 class="section-title reveal">Why Choose Smart Exam?</h2>
+        <div class="row g-4">
+            <div class="col-md-4 reveal">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="feature-title">Advanced Security</h3>
+                    <p class="feature-desc">
+                        State-of-the-art AI proctoring ensures complete exam integrity. Face recognition and behavior
+                        analysis work in real-time to prevent any malpractice.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4 reveal" style="transition-delay: 0.2s">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="feature-title">Smart Analytics</h3>
+                    <p class="feature-desc">
+                        Get detailed insights into student performance. Our AI analyzes patterns to provide
+                        comprehensive reports beyond just scores.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4 reveal" style="transition-delay: 0.4s">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3 class="feature-title">Instant Results</h3>
+                    <p class="feature-desc">
+                        No more waiting. Results are processed instantly upon submission, with detailed feedback and
+                        performance breakdowns available immediately.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Scroll Reveal Animation
+    function reveal() {
+        var reveals = document.querySelectorAll(".reveal");
+        for (var i = 0; i < reveals.length; i++) {
+            var windowHeight = window.innerHeight;
+            var elementTop = reveals[i].getBoundingClientRect().top;
+            var elementVisible = 150;
+            if (elementTop < windowHeight - elementVisible) {
+                reveals[i].classList.add("active");
+            }
+        }
+    }
+    window.addEventListener("scroll", reveal);
+
+    // Trigger once on load
+    reveal();
+
+    // Stats Counter Animation
+    const stats = document.querySelectorAll('.stat-number');
+
+    const animateStats = (entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const target = entry.target;
+                const endValue = parseFloat(target.getAttribute('data-target'));
+                const suffix = target.innerText.includes('%') ? '%' : '+';
+                let startValue = 0;
+                const duration = 2000;
+                const step = endValue / (duration / 16);
+
+                const counter = setInterval(() => {
+                    startValue += step;
+                    if (startValue >= endValue) {
+                        target.innerText = endValue + suffix;
+                        clearInterval(counter);
+                    } else {
+                        target.innerText = Math.floor(startValue) + suffix;
+                    }
+                }, 16);
+
+                observer.unobserve(target);
+            }
+        });
+    };
+
+    const statObserver = new IntersectionObserver(animateStats, {
+        threshold: 0.5
+    });
+
+    stats.forEach(stat => {
+        statObserver.observe(stat);
+    });
+
+    // Parallax Effect for 3D Card
+    document.addEventListener('mousemove', (e) => {
+        const card = document.querySelector('.glass-card-3d');
+        if (card) {
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+            card.style.transform = `perspective(1000px) rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        }
+    });
+
+    // Reset card on mouse leave
+    document.addEventListener('mouseleave', () => {
+        const card = document.querySelector('.glass-card-3d');
+        if (card) {
+            card.style.transform = 'perspective(1000px) rotateY(-10deg) rotateX(5deg)';
+        }
+    });
+</script>
+{% endblock %}
