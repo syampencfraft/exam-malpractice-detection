@@ -5,131 +5,93 @@
 {% block extra_css %}
 <style>
     body {
-        background-color: #000 !important;
+        background-color: #f8f9fa !important;
+        color: #333 !important;
     }
 
     .results-container {
-        padding-top: 100px;
+        padding-top: 50px;
         padding-bottom: 50px;
         min-height: 80vh;
-        z-index: 1;
-        position: relative;
     }
 
     .glass-card {
-        background: #000000;
-        border: 1px solid rgba(255, 215, 0, 0.3);
-        border-radius: 20px;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 15px;
         padding: 2rem;
-        box-shadow: 0 0 30px rgba(255, 215, 0, 0.05);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .glass-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 4px;
-        background: linear-gradient(90deg, #FFD700, #FDB931);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     }
 
     .page-title {
-        color: white;
+        color: #212529;
         font-weight: 800;
         margin-bottom: 2rem;
-        font-size: 2.5rem;
+        font-size: 2.2rem;
+        text-align: center;
     }
 
     /* Table Styling */
     .table-custom {
-        color: white;
+        color: #333;
         margin-bottom: 0;
-        background-color: transparent !important;
     }
 
     .table-custom thead th {
-        background: rgba(255, 215, 0, 0.1);
-        color: #FFD700;
-        border: none;
-        padding: 1rem;
-        font-weight: 600;
+        background: #f1f3f5;
+        color: #212529;
+        border-bottom: 2px solid #dee2e6;
+        padding: 1.2rem 1rem;
+        font-weight: 800;
         text-transform: uppercase;
         font-size: 0.85rem;
         letter-spacing: 1px;
     }
 
     .table-custom tbody tr {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        transition: all 0.3s ease;
-        background-color: transparent !important;
+        border-bottom: 1px solid #eee;
+        transition: all 0.2s ease;
     }
 
     .table-custom tbody tr:hover {
-        background: rgba(255, 215, 0, 0.05) !important;
+        background: #fdfdfd !important;
     }
 
     .table-custom tbody td {
         padding: 1.2rem 1rem;
         vertical-align: middle;
-        border: none;
-        color: white !important;
+        color: #212529 !important;
+    }
+
+    .exam-title-text {
+        color: #000000 !important;
+        font-weight: 700;
     }
 
     .status-pending {
-        color: #ffa502;
+        color: #f39c12;
         font-weight: 600;
-        background: rgba(255, 165, 2, 0.1);
-        padding: 0.25rem 0.75rem;
+        background: rgba(243, 156, 18, 0.1);
+        padding: 0.3rem 0.8rem;
         border-radius: 50px;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
     }
 
     .score-badge {
-        font-weight: 700;
-        color: #FFD700 !important;
+        font-weight: 800;
+        color: #d4af37 !important;
         font-size: 1.1rem;
     }
 
     .empty-state {
         text-align: center;
-        padding: 3rem;
-        color: rgba(255, 215, 0, 0.5);
-    }
-
-    .bg-blob {
-        position: absolute;
-        filter: blur(100px);
-        z-index: -1;
-        opacity: 0.3;
-    }
-
-    /* Animation */
-    .fade-in-row {
-        opacity: 0;
-        animation: fadeInRow 0.5s ease forwards;
-    }
-
-    @keyframes fadeInRow {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        padding: 4rem;
+        color: #999;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="bg-blob" style="top: 10%; left: 5%; width: 400px; height: 400px; background: #FFD700;"></div>
-<div class="bg-blob" style="bottom: 10%; right: 5%; width: 300px; height: 300px; background: #FF4500;"></div>
-
 <div class="container results-container">
     <h1 class="page-title">My Exam Results</h1>
 
@@ -146,13 +108,13 @@
                 </thead>
                 <tbody>
                     {% for result in results %}
-                    <tr class="fade-in-row" style="animation-delay: {{ forloop.counter0|add:1 }}00ms">
+                    <tr>
                         <td>
                             <div class="d-flex align-items-center">
                                 <div class="rounded-circle bg-warning bg-opacity-10 p-2 me-3 text-warning">
                                     <i class="fas fa-file-alt"></i>
                                 </div>
-                                <span class="fw-bold text-white">{{ result.exam.title }}</span>
+                                <span class="fw-bold exam-title-text">{{ result.exam.title }}</span>
                             </div>
                         </td>
                         <td>

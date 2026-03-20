@@ -244,7 +244,7 @@
                     </li>
                     {% else %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'first' %}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'features' %}">Features</a></li>
                     <li class="nav-item ms-lg-3">
                         <a href="{% url 'login' %}" class="btn btn-navbar btn-login">Login</a>
                     </li>
@@ -259,6 +259,16 @@
 
     <!-- Main Content -->
     <main>
+        <div class="container mt-4">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show bg-dark text-white border-{{ message.tags }}" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
         {% block content %}{% endblock %}
     </main>
 
@@ -284,7 +294,7 @@
                 <div class="col-lg-2 col-md-6">
                     <h5 class="footer-heading">Product</h5>
                     <ul class="footer-links">
-                        <li><a href="#">Features</a></li>
+                        <li><a href="{% url 'features' %}">Features</a></li>
                         <li><a href="#">Pricing</a></li>
                         <li><a href="#">Security</a></li>
                         <li><a href="#">Updates</a></li>

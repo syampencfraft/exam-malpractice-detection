@@ -4,26 +4,28 @@
 
 {% block extra_css %}
 <style>
+    body {
+        background-color: #f8f9fa !important;
+        color: #212529 !important;
+    }
+
     .report-container {
-        padding-top: 100px;
+        padding-top: 50px;
         padding-bottom: 50px;
         min-height: 90vh;
-        z-index: 1;
-        position: relative;
     }
 
     .glass-card {
-        background: rgba(20, 20, 20, 0.7);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 215, 0, 0.2);
-        border-radius: 20px;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 15px;
         padding: 1.5rem;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         margin-bottom: 2rem;
     }
 
     .header-info {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid #eee;
         padding-bottom: 1rem;
         margin-bottom: 1.5rem;
     }
@@ -41,7 +43,7 @@
         bottom: 0;
         left: 20px;
         width: 2px;
-        background: rgba(255, 255, 255, 0.1);
+        background: #eee;
     }
 
     .timeline-item {
@@ -53,41 +55,40 @@
     .timeline-dot {
         position: absolute;
         left: 11px;
-        top: 0;
-        width: 20px;
-        height: 20px;
+        top: 5px;
+        width: 18px;
+        height: 18px;
         border-radius: 50%;
-        border: 4px solid #1a1a1a;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        border: 3px solid white;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        z-index: 2;
     }
 
     .timeline-dot.high {
-        background: #e74c3c;
-        box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+        background: #ef4444;
     }
 
     .timeline-dot.medium {
-        background: #f39c12;
-        box-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
+        background: #f59e0b;
     }
 
     .timeline-dot.low {
-        background: #3498db;
-        box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        background: #3b82f6;
     }
 
     .timeline-content {
-        background: rgba(255, 255, 255, 0.05);
+        background: white;
         border-radius: 12px;
         padding: 1.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid #eee;
         transition: transform 0.2s;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
     }
 
     .timeline-content:hover {
         transform: translateX(5px);
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.1);
+        background: #fdfdfd;
+        border-color: #ddd;
     }
 
     .snapshot-img {
@@ -95,20 +96,21 @@
         height: auto;
         border-radius: 8px;
         margin-top: 1rem;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid #dee2e6;
         cursor: pointer;
         transition: opacity 0.2s;
     }
 
     .snapshot-img:hover {
-        opacity: 0.8;
+        opacity: 0.9;
     }
 
     .stat-box {
         text-align: center;
         padding: 1.5rem;
-        background: rgba(0, 0, 0, 0.2);
+        background: #f8f9fa;
         border-radius: 10px;
+        border: 1px solid #eee;
     }
 
     .bg-blob {
@@ -125,12 +127,12 @@
 
 <div class="container report-container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-white fw-bold"><i class="fas fa-file-contract me-2"></i> Malpractice Report</h2>
+        <h2 class="text-dark fw-bold"><i class="fas fa-file-contract me-2"></i> Malpractice Report</h2>
         <div>
-            <a href="{% url 'download_report' student.id exam.id %}" class="btn btn-warning me-2">
+            <a href="{% url 'download_report' student.id exam.id %}" class="btn btn-warning me-2 text-dark fw-bold">
                 <i class="fas fa-download me-2"></i> Download CSV
             </a>
-            <a href="{% url 'admin_results' %}" class="btn btn-outline-light">Back</a>
+            <a href="{% url 'admin_results' %}" class="btn btn-outline-dark">Back</a>
         </div>
     </div>
 
@@ -139,12 +141,12 @@
         <div class="header-info">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <h4 class="text-white mb-1">{{ student.username }}</h4>
-                    <p class="text-white-50 mb-0">{{ student.email }}</p>
+                    <h4 class="text-dark fw-bold mb-1">{{ student.username }}</h4>
+                    <p class="text-muted mb-0">{{ student.email }}</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <h5 class="text-warning mb-1">{{ exam.title }}</h5>
-                    <p class="text-white-50 mb-0">{{ exam.date }}</p>
+                    <h5 class="text-primary fw-bold mb-1">{{ exam.title }}</h5>
+                    <p class="text-muted mb-0">{{ exam.date }} | {{ exam.time|time:"h:i A" }}</p>
                 </div>
             </div>
         </div>
@@ -153,7 +155,7 @@
             <div class="col-md-3">
                 <div class="stat-box">
                     <h2 class="text-danger mb-0 fw-bold">{{ total_logs }}</h2>
-                    <small class="text-white-50 uppercase">Total Flags</small>
+                    <small class="text-muted text-uppercase fw-bold">Total Flags</small>
                 </div>
             </div>
             {% for stat in severity_breakdown %}
@@ -163,7 +165,7 @@
                         class="mb-0 fw-bold {% if stat.severity == 'HIGH' %}text-danger{% elif stat.severity == 'MEDIUM' %}text-warning{% else %}text-info{% endif %}">
                         {{ stat.count }}
                     </h2>
-                    <small class="text-white-50 uppercase">{{ stat.severity }} Severity</small>
+                    <small class="text-muted text-uppercase fw-bold">{{ stat.severity }} Severity</small>
                 </div>
             </div>
             {% endfor %}
@@ -171,7 +173,7 @@
     </div>
 
     <!-- Timeline -->
-    <h4 class="text-white mb-4 ps-2">Incident Timeline</h4>
+    <h4 class="text-dark fw-bold mb-4 ps-2">Incident Timeline</h4>
 
     {% if logs %}
     <div class="timeline">
@@ -180,19 +182,19 @@
             <div class="timeline-dot {{ log.severity|lower }}"></div>
             <div class="timeline-content">
                 <div class="d-flex justify-content-between mb-2">
-                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25">
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10">
                         {{ log.get_log_type_display }}
                     </span>
-                    <small class="text-white-50">{{ log.timestamp|date:"H:i:s A" }}</small>
+                    <small class="text-muted fw-bold">{{ log.timestamp|date:"H:i:s A" }}</small>
                 </div>
 
                 {% if log.details %}
-                <p class="text-white mb-2">{{ log.details }}</p>
+                <p class="text-dark mb-2">{{ log.details }}</p>
                 {% endif %}
 
                 {% if log.snapshot %}
                 <div class="mt-3">
-                    <small class="text-white-50 d-block mb-1"><i class="fas fa-camera me-1"></i> Snapshot
+                    <small class="text-muted d-block mb-1 fw-bold"><i class="fas fa-camera me-1"></i> Snapshot
                         Evidence</small>
                     <img src="{{ log.snapshot.url }}" class="snapshot-img" onclick="window.open(this.src, '_blank')"
                         alt="Snapshot">
@@ -204,9 +206,9 @@
     </div>
     {% else %}
     <div class="glass-card text-center py-5">
-        <i class="fas fa-check-circle fa-4x text-success mb-3 opacity-50"></i>
-        <h3 class="text-white">Clean Record</h3>
-        <p class="text-white-50">No malpractice incidents were detected during this exam session.</p>
+        <i class="fas fa-check-circle fa-4x text-success mb-3 opacity-25"></i>
+        <h3 class="text-dark fw-bold">Clean Record</h3>
+        <p class="text-muted">No malpractice incidents were detected during this exam session.</p>
     </div>
     {% endif %}
 </div>

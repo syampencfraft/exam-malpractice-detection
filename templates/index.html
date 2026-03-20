@@ -173,17 +173,39 @@
 
                 <div class="exam-meta">
                     <span><i class="far fa-calendar"></i> {{ exam.date }}</span>
-                    <span><i class="far fa-clock"></i> {{ exam.time }}</span>
+                    <span><i class="far fa-clock"></i> {{ exam.time|time:"h:i A" }}</span>
                 </div>
 
                 <div class="mb-4">
+                    {% with exam_time=exam.date|date:"Y-m-d"|add:" "|add:exam.time|date:"H:i:s" %}
+                    {# This is tricky in template, better to use a custom property in model or just simple logic #}
+                    {# Actually, let's just use the status logic from views if we had it, but for now we'll do simple date check #}
+                    {% if exam.date > now|date:"Y-m-d" %}
+                        <span class="badge bg-info text-dark mb-2">Upcoming</span>
+                    {% elif exam.date < now|date:"Y-m-d" %}
+                        <span class="badge bg-secondary mb-2">Ended</span>
+                    {% else %}
+                        <span class="badge bg-success mb-2">Available Today</span>
+                    {% endif %}
+                    {% endwith %}
+                    
                     <small class="text-white-50 d-block mb-1">Topic</small>
                     <p class="text-white mb-0">{{ exam.topic }}</p>
                 </div>
 
-                <a href="{% url 'take_exam' exam.id %}" class="btn-start">
-                    Start Exam <i class="fas fa-arrow-right ms-2"></i>
-                </a>
+                {% if exam.date == now.date %}
+                    <a href="{% url 'take_exam' exam.id %}" class="btn-start">
+                        Start Exam <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                {% elif exam.date > now.date %}
+                    <button class="btn btn-secondary w-100" disabled>
+                        Not Started Yet <i class="fas fa-lock ms-2"></i>
+                    </button>
+                {% else %}
+                    <button class="btn btn-danger w-100" disabled>
+                        Exam Ended <i class="fas fa-times ms-2"></i>
+                    </button>
+                {% endif %}
             </div>
         </div>
         {% endfor %}

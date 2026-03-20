@@ -52,6 +52,7 @@ class Question(models.Model):
 class StudentAnswer(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE)
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+    result = models.ForeignKey('ExamResult', on_delete=models.CASCADE, null=True, blank=True, related_name='answers')
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     answer_text = models.TextField()
     

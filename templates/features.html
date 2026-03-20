@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Features - SmartExam{% endblock %}
+
+{% block extra_css %}
+<style>
+    .features-hero {
+        padding: 100px 0 60px;
+        background: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(20,20,20,1) 100%);
+        text-align: center;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #FFD700, #FDB931);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+        color: rgba(255, 255, 255, 0.7);
+        max-width: 700px;
+        margin: 0 auto 40px;
+    }
+
+    .feature-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 40px;
+        height: 100%;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--primary-color);
+        box-shadow: 0 10px 30px rgba(255, 215, 0, 0.1);
+    }
+
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(253, 185, 49, 0.1));
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 25px;
+        font-size: 1.75rem;
+        color: var(--primary-color);
+    }
+
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #fff;
+    }
+
+    .feature-text {
+        color: rgba(255, 255, 255, 0.6);
+        line-height: 1.7;
+    }
+
+    .cta-section {
+        padding: 100px 0;
+        background: radial-gradient(circle at center, rgba(255, 215, 0, 0.05) 0%, transparent 70%);
+        text-align: center;
+    }
+
+    .cta-box {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 30px;
+        padding: 60px;
+        backdrop-filter: blur(10px);
+    }
+
+    .cta-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .btn-lg-custom {
+        padding: 15px 40px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s;
+    }
+
+    /* Section animations */
+    .reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease-out;
+    }
+
+    .reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="features-hero">
+    <div class="container">
+        <h1 class="hero-title pt-5">Advanced Examination Intelligence</h1>
+        <p class="hero-subtitle">Elevate your academic integrity with our suite of AI-driven proctoring and management tools designed for the modern era of education.</p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Feature 1: AI Proctoring -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card reveal active">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3 class="feature-title">AI-Powered Proctoring</h3>
+                    <p class="feature-text">Our advanced algorithms monitor student behavior in real-time, detecting suspicious movements, unauthorized objects, and multiple persons in the frame.</p>
+                </div>
+            </div>
+
+            <!-- Feature 2: Face Verification -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card reveal active">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h3 class="feature-title">Biometric Verification</h3>
+                    <p class="feature-text">Secure identity confirmation using state-of-the-art face recognition technology to ensure the right student is taking the right exam.</p>
+                </div>
+            </div>
+
+            <!-- Feature 3: Browser Lockdown -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card reveal active">
+                    <div class="feature-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3 class="feature-title">Secure Environment</h3>
+                    <p class="feature-text">Prevents tab-switching, unauthorized keyboard shortcuts, and screen sharing to maintain a strictly controlled examination environment.</p>
+                </div>
+            </div>
+
+            <!-- Feature 4: Real-time Monitoring -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card reveal active">
+                    <div class="feature-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <h3 class="feature-title">Live Video Feeds</h3>
+                    <p class="feature-text">Admins can monitor live sessions through discrete video streams, providing an extra layer of human oversight alongside AI detection.</p>
+                </div>
+            </div>
+
+            <!-- Feature 5: Detailed Analytics -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card reveal active">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="feature-title">Comprehensive Analytics</h3>
+                    <p class="feature-text">Generate detailed reports of student performance and integrity logs, with visualized data to help identify trends and anomalies.</p>
+                </div>
+            </div>
+
+            <!-- Feature 6: Question Bank -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card reveal active">
+                    <div class="feature-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <h3 class="feature-title">Dynamic Exam Creation</h3>
+                    <p class="feature-text">Easily create exams with multiple question types, including MCQs and descriptive answers, with automated and manual grading workflows.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-box">
+            <h2 class="cta-title">Ready to modernize your exams?</h2>
+            <p class="hero-subtitle mb-5">Join forward-thinking institutions that have already transitioned to the future of online assessment.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'signup' %}" class="btn btn-signup btn-lg-custom">Get Started Now</a>
+                <a href="{% url 'login' %}" class="btn btn-login btn-lg-custom">View Demo</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Simple reveal animation on scroll
+    window.addEventListener('scroll', reveal);
+
+    function reveal() {
+        var reveals = document.querySelectorAll('.feature-card');
+        for (var i = 0; i < reveals.length; i++) {
+            var windowHeight = window.innerHeight;
+            var elementTop = reveals[i].getBoundingClientRect().top;
+            var elementVisible = 150;
+            if (elementTop < windowHeight - elementVisible) {
+                reveals[i].classList.add('active');
+            }
+        }
+    }
+</script>
+{% endblock %}

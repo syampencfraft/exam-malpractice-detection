@@ -165,17 +165,17 @@
                     <div class="mb-4">
                         <label class="form-label">Exam Title</label>
                         <input type="text" name="title" class="form-control" placeholder="e.g. Midterm Mathematics"
-                            required>
+                            value="{{ title|default:'' }}" required>
                     </div>
 
                     <div class="row g-4 mb-4">
                         <div class="col-md-6">
                             <label class="form-label">Date</label>
-                            <input type="date" name="date" class="form-control" required>
+                            <input type="date" name="date" id="examDate" class="form-control" value="{{ date|default:'' }}" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Time</label>
-                            <input type="time" name="time" class="form-control" required>
+                            <input type="time" name="time" class="form-control" value="{{ time|default:'' }}" required>
                         </div>
                     </div>
 
@@ -183,21 +183,29 @@
                         <div class="col-md-8">
                             <label class="form-label">Topic / Subject</label>
                             <input type="text" name="topic" class="form-control" placeholder="e.g. Algebra and Calculus"
-                                required>
+                                value="{{ topic|default:'' }}" required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Duration (Min)</label>
-                            <input type="number" name="duration" class="form-control" placeholder="e.g. 120" required>
+                            <input type="number" name="duration" class="form-control" placeholder="e.g. 120" 
+                                value="{{ duration|default:'' }}" required>
                         </div>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label">Assign Students</label>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label mb-0">Assign Students</label>
+                            <div class="form-check mb-0">
+                                <input class="form-check-input" type="checkbox" id="selectAllStudents" style="transform: scale(0.9);">
+                                <label class="form-check-label small text-white-50" for="selectAllStudents">Select All</label>
+                            </div>
+                        </div>
                         <div class="student-list-container custom-scrollbar">
                             {% for student in students %}
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="students"
-                                    value="{{ student.user.id }}" id="student_{{ student.id }}">
+                                    value="{{ student.user.id }}" id="student_{{ student.id }}"
+                                    {% if student.user.id in selected_students %}checked{% endif %}>
                                 <label class="form-check-label d-flex justify-content-between align-items-center pe-2"
                                     for="student_{{ student.id }}">
                                     <span>
@@ -234,5 +242,19 @@
         form.style.opacity = '1';
         form.style.transform = 'translateY(0)';
     }, 100);
+
+    // Set min date to today
+    const dateInput = document.getElementById('examDate');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.setAttribute('min', today);
+
+    // Select All logic
+    const selectAllBtn = document.getElementById('selectAllStudents');
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('input[name="students"]');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+    }
 </script>
 {% endblock %}

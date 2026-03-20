@@ -4,158 +4,120 @@
 
 {% block extra_css %}
 <style>
+    body {
+        background-color: #f8f9fa !important;
+        color: #333 !important;
+    }
+
     .results-container {
-        padding-top: 100px;
+        padding-top: 50px;
         padding-bottom: 50px;
         min-height: 80vh;
-        z-index: 1;
-        position: relative;
     }
 
     .glass-card {
-        background: rgba(20, 20, 20, 0.7);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 215, 0, 0.2);
-        border-radius: 20px;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 15px;
         padding: 1.5rem;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         margin-bottom: 1.5rem;
     }
 
     .stat-card {
-        background: rgba(255, 255, 255, 0.05);
+        background: white;
         border-radius: 15px;
         padding: 1.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid #dee2e6;
         transition: transform 0.3s;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.02);
     }
 
     .stat-card:hover {
         transform: translateY(-5px);
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 215, 0, 0.3);
+        border-color: #FFD700;
     }
 
     .stat-value {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
         font-weight: 800;
-        color: white;
+        color: #212529;
         line-height: 1;
         margin-bottom: 0.5rem;
     }
 
     .stat-label {
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 0.9rem;
+        color: #666;
+        font-size: 0.8rem;
         text-transform: uppercase;
         letter-spacing: 1px;
     }
 
     .filter-bar {
-        background: rgba(0, 0, 0, 0.3);
+        background: #f8f9fa;
         border-radius: 15px;
         padding: 1.5rem;
         margin-bottom: 2rem;
+        border: 1px solid #dee2e6;
     }
 
     .form-control,
     .form-select {
-        background: rgba(255, 255, 255, 0.1);
-        border: none;
-        color: white;
+        background: white;
+        border: 1px solid #ced4da;
+        color: #333;
         padding: 0.7rem 1rem;
     }
 
     .form-control:focus,
     .form-select:focus {
-        background: rgba(255, 255, 255, 0.15);
-        color: white;
-        box-shadow: none;
+        background: white;
+        color: #333;
+        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
         border: 1px solid #FFD700;
     }
 
     /* Table */
     .table-custom {
-        color: white;
-        background-color: transparent !important;
+        color: #212529;
     }
 
     .table-custom thead th {
-        background: rgba(255, 215, 0, 0.1);
-        color: #FFD700;
-        border: none;
+        background: #f8f9fa;
+        color: #666;
+        border-bottom: 2px solid #dee2e6;
         padding: 1rem;
+        font-weight: 700;
+        font-size: 0.8rem;
     }
 
     .table-custom tbody tr {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid #eee;
         transition: background 0.2s;
-        background-color: transparent !important;
     }
 
     .table-custom tbody tr:hover {
-        background: rgba(255, 255, 255, 0.05) !important;
+        background: #fdfdfd !important;
     }
 
     .table-custom td {
         padding: 1rem;
         vertical-align: middle;
-        background-color: transparent !important;
-        color: white !important;
+        color: #212529 !important;
     }
 
-    .malpractice-badge {
-        background: rgba(231, 76, 60, 0.2);
-        color: #e74c3c;
-        border: 1px solid rgba(231, 76, 60, 0.3);
-        padding: 0.3rem 0.8rem;
-        border-radius: 50px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-
-    .malpractice-badge:hover {
-        background: rgba(231, 76, 60, 0.3);
-        color: #ff6b6b;
-    }
-
-    .btn-evaluate {
-        background: #FFD700;
-        color: black;
-        border: none;
-        padding: 0.4rem 1rem;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-
-    .btn-evaluate:hover {
-        background: #FDB931;
-        transform: translateY(-2px);
-        color: black;
-    }
-
-    .bg-blob {
-        position: absolute;
-        filter: blur(120px);
-        z-index: -1;
-        opacity: 0.3;
+    .exam-title-text {
+        color: #000000 !important;
+        font-weight: 700;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="bg-blob" style="top: 0; right: 0; width: 600px; height: 600px; background: #FFD700;"></div>
-<div class="bg-blob" style="bottom: 0; left: 0; width: 400px; height: 400px; background: #FF4500;"></div>
-
 <div class="container results-container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-white fw-bold">Example Results & Analysis</h2>
-        <a href="{% url 'approve' %}" class="btn btn-outline-light">Back to Dashboard</a>
+        <h2 class="text-dark fw-bold">Exam Results & Analysis</h2>
+        <a href="{% url 'approve' %}" class="btn btn-outline-dark">Back to Dashboard</a>
     </div>
 
     <!-- Stats Row -->
@@ -185,17 +147,17 @@
         <div class="filter-bar">
             <form method="GET" class="row g-3 align-items-end">
                 <div class="col-md-3">
-                    <label class="form-label text-white-50">Filter by Exam</label>
+                    <label class="form-label text-dark opacity-75">Filter by Exam</label>
                     <select name="exam" class="form-select">
                         <option value="">All Exams</option>
                         {% for exam in exams %}
-                        <option value="{{ exam.id }}" {% if selected_exam == exam.id %}selected{% endif %}>{{ exam.title
-                            }}</option>
+                        <option value="{{ exam.id }}" {% if selected_exam == exam.id %}selected{% endif %}>{{ exam.title }}</option>
+                            
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label text-white-50">Min Severity</label>
+                    <label class="form-label text-dark opacity-75">Min Severity</label>
                     <select name="severity" class="form-select">
                         <option value="">All Levels</option>
                         <option value="LOW" {% if selected_severity == "LOW" %}selected{% endif %}>Low</option>
@@ -204,7 +166,7 @@
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label text-white-50">Search Student</label>
+                    <label class="form-label text-dark opacity-75">Search Student</label>
                     <input type="text" name="student" class="form-control" placeholder="Enter username..."
                         value="{{ selected_student }}">
                 </div>
@@ -218,20 +180,22 @@
             <table class="table table-custom">
                 <thead>
                     <tr>
-                        <th>Student</th>
-                        <th>Exam Title</th>
-                        <th>Score</th>
-                        <th>Grade</th>
-                        <th>Flags</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                        <th class="text-dark">Student</th>
+                        <th class="text-dark">Exam Title</th>
+                        <th class="text-dark">Date/Time</th>
+                        <th class="text-dark">Score</th>
+                        <th class="text-dark">Grade</th>
+                        <th class="text-dark">Flags</th>
+                        <th class="text-dark">Status</th>
+                        <th class="text-dark">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for result in results %}
                     <tr>
                         <td class="fw-bold">{{ result.student.username }}</td>
-                        <td>{{ result.exam.title }}</td>
+                        <td class="exam-title-text">{{ result.exam.title }}</td>
+                        <td class="small">{{ result.exam.time|time:"h:i A" }}</td>
                         <td>
                             {% if result.status == 'PENDING' %}
                             <span class="text-white-50">-</span>

@@ -4,30 +4,32 @@
 
 {% block extra_css %}
 <style>
+    body {
+        background-color: #f8f9fa !important;
+        color: #333 !important;
+    }
+
     .eval-container {
-        padding-top: 100px;
+        padding-top: 50px;
         padding-bottom: 50px;
         min-height: 90vh;
-        z-index: 1;
-        position: relative;
     }
 
     .glass-panel {
-        background: rgba(20, 20, 20, 0.7);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 215, 0, 0.2);
-        border-radius: 20px;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 15px;
         overflow: hidden;
         height: 100%;
         display: flex;
         flex-direction: column;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
     }
 
     .panel-header {
-        background: rgba(255, 215, 0, 0.1);
+        background: #f8f9fa;
         padding: 1.2rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 2px solid #dee2e6;
     }
 
     .scroll-area {
@@ -37,30 +39,35 @@
     }
 
     .question-card {
-        background: rgba(255, 255, 255, 0.05);
+        background: #fff;
         border-radius: 12px;
         padding: 1.5rem;
         margin-bottom: 1.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid #eee;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
     }
 
     .answer-box {
-        background: rgba(0, 0, 0, 0.2);
-        border-left: 3px solid #FFD700;
-        padding: 1rem;
+        background: #fdfdfd;
+        border-left: 4px solid #FFD700;
+        padding: 1.2rem;
         margin-top: 1rem;
         border-radius: 0 8px 8px 0;
-        color: rgba(255, 255, 255, 0.9);
-        font-family: monospace;
+        color: #212529;
+        font-family: 'JetBrains Mono', monospace;
+        border: 1px solid #eee;
+        border-left-width: 4px;
     }
 
     .log-item {
-        background: rgba(231, 76, 60, 0.1);
+        background: #fff5f5;
         border-left: 3px solid #e74c3c;
         padding: 0.8rem;
         margin-bottom: 0.8rem;
         border-radius: 4px;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
+        border: 1px solid #fee2e2;
+        border-left-width: 3px;
     }
 
     .severity-badge {
@@ -69,34 +76,35 @@
         border-radius: 4px;
         text-transform: uppercase;
         margin-right: 0.5rem;
+        font-weight: 700;
     }
 
     .high {
-        background: #e74c3c;
-        color: white;
+        background: #fee2e2;
+        color: #991b1b;
     }
 
     .medium {
-        background: #f39c12;
-        color: black;
+        background: #fef3c7;
+        color: #92400e;
     }
 
     .low {
-        background: #3498db;
-        color: white;
+        background: #dcfce7;
+        color: #166534;
     }
 
-    .form-control {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
+    .form-control, .form-select {
+        background: white;
+        border: 1px solid #ced4da;
+        color: #333;
     }
 
-    .form-control:focus {
-        background: rgba(255, 255, 255, 0.15);
-        color: white;
+    .form-control:focus, .form-select:focus {
+        background: white;
+        color: #333;
         border-color: #FFD700;
-        box-shadow: none;
+        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
     }
 
     .btn-publish {
@@ -108,13 +116,12 @@
         width: 100%;
         border-radius: 10px;
         margin-top: 1rem;
+        transition: transform 0.2s;
     }
 
-    .bg-blob {
-        position: absolute;
-        filter: blur(120px);
-        z-index: -1;
-        opacity: 0.3;
+    .btn-publish:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
     }
 </style>
 {% endblock %}
@@ -126,11 +133,11 @@
 <div class="container-fluid eval-container px-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h3 class="text-white fw-bold mb-0">Evaluation Mode</h3>
-            <p class="text-white-50 mb-0">Student: <span class="text-warning">{{ result.student.username }}</span> |
-                Exam: {{ result.exam.title }}</p>
+            <h3 class="text-dark fw-bold mb-0">Evaluation Mode</h3>
+            <p class="text-muted mb-0">Student: <span class="text-primary fw-bold">{{ result.student.username }}</span> |
+                Exam: <span class="text-dark fw-bold">{{ result.exam.title }}</span></p>
         </div>
-        <a href="{% url 'admin_results' %}" class="btn btn-outline-light">Close</a>
+        <a href="{% url 'admin_results' %}" class="btn btn-outline-dark">Close</a>
     </div>
 
     <div class="row g-4" style="height: 80vh;">
@@ -143,14 +150,37 @@
                 <div class="scroll-area custom-scrollbar">
                     {% for question in questions %}
                     <div class="question-card">
-                        <div class="d-flex justify-content-between">
-                            <h5 class="text-white mb-3">Q{{ forloop.counter }}. {{ question.question_text }}</h5>
-                            <span class="badge bg-secondary h-auto align-self-start">{{
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="text-dark fw-bold mb-0">Q{{ forloop.counter }}. {{ question.question_text }}</h5>
+                            <span class="badge bg-light text-dark border">{{
                                 question.get_question_type_display }}</span>
                         </div>
 
                         {% if question.question_type == 'MCQ' %}
-                        <div class="text-white-50 small fst-italic">This question was auto-graded.</div>
+                        <div class="options-display mt-2 p-3 rounded bg-black bg-opacity-25 border border-white border-opacity-10">
+                            {% with choice=question.student_answer %}
+                            <div class="row g-2">
+                                <div class="col-6 small {% if choice == '1' %}text-warning fw-bold{% else %}text-white-50{% endif %}">
+                                    A. {{ question.option_1 }} {% if choice == '1' %}<i class="fas fa-check-circle ms-1"></i>{% endif %}
+                                </div>
+                                <div class="col-6 small {% if choice == '2' %}text-warning fw-bold{% else %}text-white-50{% endif %}">
+                                    B. {{ question.option_2 }} {% if choice == '2' %}<i class="fas fa-check-circle ms-1"></i>{% endif %}
+                                </div>
+                                <div class="col-6 small {% if choice == '3' %}text-warning fw-bold{% else %}text-white-50{% endif %}">
+                                    C. {{ question.option_3 }} {% if choice == '3' %}<i class="fas fa-check-circle ms-1"></i>{% endif %}
+                                </div>
+                                <div class="col-6 small {% if choice == '4' %}text-warning fw-bold{% else %}text-white-50{% endif %}">
+                                    D. {{ question.option_4 }} {% if choice == '4' %}<i class="fas fa-check-circle ms-1"></i>{% endif %}
+                                </div>
+                            </div>
+                            {% endwith %}
+                            <div class="mt-2 small">
+                                <span class="text-info">Correct Option: </span>
+                                <span class="text-success fw-bold">
+                                    {% if question.correct_option == 1 %}A{% elif question.correct_option == 2 %}B{% elif question.correct_option == 3 %}C{% elif question.correct_option == 4 %}D{% endif %}
+                                </span>
+                            </div>
+                        </div>
                         {% else %}
                         <div class="answer-box">
                             {{ question.student_answer|linebreaksbr }}
@@ -167,8 +197,8 @@
             <div class="d-flex flex-column h-100 gap-3">
                 <!-- Malpractice Logs -->
                 <div class="glass-panel" style="height: 40%;">
-                    <div class="panel-header bg-danger bg-opacity-25">
-                        <h6 class="mb-0 text-white"><i class="fas fa-exclamation-triangle me-2"></i> Flags ({{ log_count
+                    <div class="panel-header bg-danger bg-opacity-10">
+                        <h6 class="mb-0 text-danger"><i class="fas fa-exclamation-triangle me-2"></i> Flags ({{ log_count
                             }})</h6>
                     </div>
                     <div class="scroll-area custom-scrollbar p-2">
@@ -176,12 +206,12 @@
                         <div class="log-item">
                             <div class="d-flex justify-content-between mb-1">
                                 <span class="severity-badge {{ log.severity|lower }}">{{ log.severity }}</span>
-                                <small class="text-white-50">{{ log.timestamp|date:"H:i:s" }}</small>
+                                <small class="text-muted">{{ log.timestamp|date:"H:i:s A" }}</small>
                             </div>
-                            <div class="text-white small">{{ log.get_log_type_display }}</div>
+                            <div class="text-dark small">{{ log.get_log_type_display }}</div>
                         </div>
                         {% empty %}
-                        <div class="text-center text-white-50 py-3 small">No flags detected.</div>
+                        <div class="text-center text-muted py-3 small">No flags detected.</div>
                         {% endfor %}
                     </div>
                 </div>
@@ -189,23 +219,23 @@
                 <!-- Grading Form -->
                 <div class="glass-panel" style="height: 60%;">
                     <div class="panel-header">
-                        <h6 class="mb-0 text-white"><i class="fas fa-check-circle me-2"></i> Final Grade</h6>
+                        <h6 class="mb-0 text-dark"><i class="fas fa-check-circle me-2"></i> Final Grade</h6>
                     </div>
                     <div class="scroll-area custom-scrollbar p-3">
                         <form method="POST">
                             {% csrf_token %}
                             <div class="mb-3">
-                                <label class="form-label text-white-50">Total Score</label>
+                                <label class="form-label text-muted">Total Score</label>
                                 <input type="number" name="score"
-                                    class="form-control form-control-lg text-warning fw-bold text-center"
+                                    class="form-control form-control-lg text-primary fw-bold text-center"
                                     value="{{ result.score }}" required>
-                                <div class="form-text text-white-50 text-center">Max Score: {{ result.total_questions }}
+                                <div class="form-text text-muted text-center">Max Score: {{ result.total_questions }}
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label text-white-50">Grade</label>
-                                <select name="grade" class="form-select bg-dark text-white border-secondary">
+                                <label class="form-label text-muted">Grade</label>
+                                <select name="grade" class="form-select bg-white text-dark border-secondary">
                                     <option value="Pending" {% if result.grade == "Pending" %}selected{% endif %}>Pending
                                     </option>
                                     <option value="Fail" {% if result.grade == "Fail" %}selected{% endif %}>Fail</option>
@@ -220,7 +250,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label text-white-50">Comments</label>
+                                <label class="form-label text-muted">Comments</label>
                                 <textarea name="admin_comments" class="form-control" rows="4"
                                     placeholder="Enter feedback for student...">{{ result.admin_comments }}</textarea>
                             </div>

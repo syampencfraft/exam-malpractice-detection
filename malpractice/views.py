@@ -10,7 +10,8 @@ import base64
 from django.core.files.base import ContentFile
 from django.db.models import Count, Q
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -24,6 +25,9 @@ from .face_utils import encode_face_from_image, verify_face, is_valid_face_image
 def first(request):
     return render(request, 'first.html')
 
+def features_page(request):
+    return render(request, 'features.html')
+
 def index(request):
     if request.user.is_authenticated:
         if request.user.is_staff:
@@ -33,7 +37,7 @@ def index(request):
             exams = request.user.exams.exclude(id__in=taken_exam_ids).order_by('-date')
     else:
         exams = None
-    return render(request,'index.html', {'exams': exams})
+    return render(request,'index.html', {'exams': exams, 'now': timezone.now()})
 
 
 
@@ -182,6 +186,31 @@ def add_exam(request):
         duration = request.POST.get('duration')
         student_ids = request.POST.getlist('students')
         
+        # Validate past date/time
+        from django.utils import timezone
+        from datetime import datetime
+        
+        try:
+            exam_datetime_str = f"{date} {time}"
+            exam_datetime = timezone.make_aware(datetime.strptime(exam_datetime_str, "%Y-%m-%d %H:%M"))
+            
+            if exam_datetime < timezone.now():
+                messages.error(request, "Cannot create an exam in the past date or time.")
+                students = StudentProfile.objects.filter(is_approved=True)
+                return render(request, "add_exam.html", {
+                    "students": students,
+                    "title": title,
+                    "date": date,
+                    "time": time,
+                    "topic": topic,
+                    "duration": duration,
+                    "selected_students": [int(sid) for sid in student_ids]
+                })
+        except ValueError:
+            messages.error(request, "Invalid date or time format.")
+            students = StudentProfile.objects.filter(is_approved=True)
+            return render(request, "add_exam.html", {"students": students})
+
         exam = Exam.objects.create(
             title=title,
             date=date,
@@ -252,6 +281,19 @@ def take_exam(request, pk):
         messages.error(request, "You are not assigned to this exam.")
         return redirect('index')
     
+    # Check if we are in the exam time window
+    exam_datetime = timezone.make_aware(datetime.combine(exam.date, exam.time))
+    end_datetime = exam_datetime + timedelta(minutes=exam.duration_minutes)
+    now = timezone.now()
+    
+    if not request.user.is_staff:
+        if now < exam_datetime:
+            messages.info(request, f"The exam '{exam.title}' starts at {exam.time} on {exam.date}. Please wait.")
+            return redirect('index')
+        elif now > end_datetime:
+            messages.error(request, f"The exam '{exam.title}' has already ended.")
+            return redirect('index')
+    
     # Check if student has verified their face for this exam
     if not request.user.is_staff:
         try:
@@ -270,35 +312,41 @@ def take_exam(request, pk):
         has_descriptive = False
         total = questions.count()
         
+        # We'll create the result first so we can link answers to it
+        video_file = request.FILES.get('video_file')
+        
+        # Temporary score, will update after loop
+        result = ExamResult.objects.create(
+            student=request.user,
+            exam=exam,
+            score=0,
+            total_questions=total,
+            status='PENDING', # Default to pending if we have descriptive, will update below
+            video_file=video_file
+        )
+
         for q in questions:
             user_answer = request.POST.get(f'q{q.id}')
             
+            # Save every answer (including empty ones for completeness)
+            StudentAnswer.objects.create(
+                student=request.user,
+                exam=exam,
+                result=result,
+                question=q,
+                answer_text=user_answer if user_answer else ""
+            )
+
             if q.question_type == 'DESCRIPTIVE':
                 has_descriptive = True
-                if user_answer:
-                    StudentAnswer.objects.create(
-                        student=request.user,
-                        exam=exam,
-                        question=q,
-                        answer_text=user_answer
-                    )
             elif q.question_type == 'MCQ':
                 if user_answer and int(user_answer) == q.correct_option:
                     score += 1
         
-        # Determine status
-        status = 'PENDING' if has_descriptive else 'PUBLISHED'
-        
-        video_file = request.FILES.get('video_file')
-        
-        ExamResult.objects.create(
-            student=request.user,
-            exam=exam,
-            score=score,
-            total_questions=total,
-            status=status,
-            video_file=video_file
-        )
+        # Update result with final score and status
+        result.score = score
+        result.status = 'PENDING' if has_descriptive else 'PUBLISHED'
+        result.save()
         
         msg = f"Exam '{exam.title}' submitted!"
         if status == 'PENDING':
@@ -462,13 +510,19 @@ def evaluate_exam(request, result_id):
     student = result.student
     exam = result.exam
     
-    # Get answers
-    student_answers = StudentAnswer.objects.filter(student=student, exam=exam)
+    # Get specific answers for THIS result attempt
+    student_answers = StudentAnswer.objects.filter(result=result)
     answers_map = {a.question_id: a.answer_text for a in student_answers}
     
     # Get malpractice logs
     logs = MalpracticeLog.objects.filter(student=student, exam=exam).order_by('-timestamp')
     log_count = logs.count()
+    
+    questions = Question.objects.filter(exam=exam)
+    questions_with_answers = []
+    for q in questions:
+        q.student_answer = answers_map.get(q.id, "No answer provided.")
+        questions_with_answers.append(q)
     
     if request.method == "POST":
         score = request.POST.get('score')
